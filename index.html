@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CASCADE Order Pad Prototype</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="navigation.css" />
+    <link rel="stylesheet" href="brand-equalisation.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="CASCADE home">
+          <img class="brand-logo" src="logo.png" alt="CASCADE Plus" />
+        </a>
+        <nav class="main-nav" aria-label="Primary">
+          <button type="button" onclick="window.location.href='Dashboard.html'">Dashboard</button>
+          <button type="button" class="active">Order Pad</button>
+          <button type="button" onclick="window.location.href='history.html'">Order History</button>
+          <button type="button" onclick="window.location.href='report.html'">Reports</button>
+          <button type="button" onclick="window.location.href='help.html'">Help</button>
+          <div class="nav-more">
+            <button class="more-toggle" type="button" aria-haspopup="true" aria-expanded="false">More</button>
+            <div class="more-menu" role="menu">
+              <a href="pending.html" role="menuitem">Pending Order</a>
+              <a href="outofstock.html" role="menuitem">Out Of Stock</a>
+              <a href="settings.html" role="menuitem">Settings</a>
+            </div>
+          </div>
+        </nav>
+        <div class="account-menu">
+          <button class="profile-button" type="button" aria-haspopup="true" aria-expanded="false">HI, DUMMY1</button>
+          <div class="account-dropdown" role="menu">
+            <button class="account-menu-item" type="button" role="menuitem">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 11.5 12 4l9 7.5"></path>
+                <path d="M5.5 10.5V20h13v-9.5"></path>
+                <path d="M9.5 17h5"></path>
+                <path d="M9 14h2"></path>
+                <path d="M13 14h2"></path>
+              </svg>
+              Reset Password
+            </button>
+            <span class="account-menu-separator" aria-hidden="true"></span>
+            <button class="account-menu-item" type="button" role="menuitem">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="7.5" cy="16.5" r="3"></circle>
+                <path d="m10 14 7.5-7.5"></path>
+                <path d="m15.5 8.5 2 2"></path>
+                <path d="m18 6 2 2"></path>
+              </svg>
+              Log Out
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="page-heading" aria-labelledby="pageTitle">
+          <div class="heading-copy">
+            <h1 id="pageTitle">Order Pad</h1>
+            <p class="subheading">Search, upload, and manage your order basket before placing an order.</p>
+          </div>
+          <button class="panel-toggle" id="toggleAddProduct" type="button" aria-controls="addProductPanel" aria-expanded="true">- Hide Add Product</button>
+        </section>
+
+        <section class="add-product-panel" id="addProductPanel" aria-label="Add product">
+          <div class="search-widget-row">
+            <div class="product-search-stack">
+              <form class="product-search-form search-widget" id="productSearchForm">
+                <label class="compact-field name-field">
+                  <input id="nameSearch" type="search" autocomplete="off" placeholder="Search Product or PIP code..." />
+                </label>
+                <div class="compact-field quantity-field">
+                  <div class="quantity-stepper">
+                    <button class="quantity-button" id="decreaseQuantity" type="button" aria-label="Decrease quantity">-</button>
+                    <input id="quantityInput" type="number" min="1" value="1" aria-label="Quantity" />
+                    <button class="quantity-button" id="increaseQuantity" type="button" aria-label="Increase quantity">+</button>
+                  </div>
+                </div>
+                <button class="basket-add-button" type="submit" aria-label="Add product to basket" title="Add product to basket">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 7h14l-1.2 8.2a2 2 0 0 1-2 1.7H8.2a2 2 0 0 1-2-1.7L5 7Z" />
+                    <path d="M8.2 7 10.8 3h2.4l2.6 4" />
+                    <path d="M9 11h6" />
+                    <path d="M12 8v6" />
+                    <circle cx="9" cy="20" r="1" />
+                    <circle cx="16" cy="20" r="1" />
+                  </svg>
+                </button>
+              </form>
+              <div class="search-results" id="searchResults" aria-label="Product search results"></div>
+            </div>
+
+            <section class="upload-order-widget search-widget" aria-label="Upload order">
+              <strong>Upload Order</strong>
+              <span class="widget-divider" aria-hidden="true"></span>
+              <label class="upload-dropzone" for="orderUpload">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                  <path d="M14 2v6h6" />
+                  <path d="M12 12v6" />
+                  <path d="M9 15h6" />
+                </svg>
+                <span>Drop file or click to upload</span>
+                <input id="orderUpload" type="file" accept=".csv,.xlsx,.xls" />
+              </label>
+              <span class="widget-divider" aria-hidden="true"></span>
+              <button class="upload-icon-button secondary-upload" id="downloadOrderTemplate" type="button" aria-label="Download order template" title="Download order template">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3v12" />
+                  <path d="m7 10 5 5 5-5" />
+                  <path d="M5 21h14" />
+                </svg>
+              </button>
+              <button class="upload-icon-button primary-upload" id="uploadOrderButton" type="button" aria-label="Upload order" title="Upload order">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 21V9" />
+                  <path d="m7 14 5-5 5 5" />
+                  <path d="M5 3h14" />
+                </svg>
+              </button>
+            </section>
+          </div>
+        </section>
+
+        <div class="order-layout">
+          <section class="basket-panel" id="orderBasket" aria-label="Order Basket" tabindex="-1">
+            <div class="basket-header">
+              <div class="basket-title-row">
+                <p class="eyebrow">Order Basket</p>
+                <a class="override-chip off" id="overrideChip" href="settings.html#override" title="Change in Settings">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  <span id="overrideChipLabel">DT Override Off</span>
+                </a>
+                <a class="lock-chip off" id="supplierLockChip" href="settings.html#supplierLock" title="Change in Settings">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  <span id="supplierLockChipLabel">Supplier Lock Off</span>
+                </a>
+              </div>
+            </div>
+            <div class="basket-overview-row">
+              <div class="basket-action-stack">
+              <div class="basket-legend" aria-label="Basket indicators">
+                <span class="basket-legend-concession" tabindex="0" data-tip="C — Price Concession active for this month">
+                  <span class="concession-indicator" aria-hidden="true">C</span>
+                  <span>Price Concession</span>
+                </span>
+              </div>
+              <div class="basket-tools">
+                <input id="basketFilter" type="search" placeholder="Filter basket by product or PIP" />
+                <button class="primary-action" id="placeOrderButton" type="button">Place Order</button>
+                <button class="icon-action remove-action bulk-remove-action" id="removeSelectedButton" type="button" aria-label="Remove selected products" title="Remove selected products" disabled>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 6h18"></path>
+                    <path d="M8 6V4h8v2"></path>
+                    <path d="m19 6-1 14H6L5 6"></path>
+                    <path d="M10 11v5M14 11v5"></path>
+                  </svg>
+                </button>
+                <button class="icon-action refresh-action" id="refreshPrices" type="button" aria-label="Refresh prices" title="Refresh prices">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 12a9 9 0 1 0 3-6.7"></path>
+                    <path d="M3 4v5h5"></path>
+                  </svg>
+                </button>
+                <div class="advanced-sort-menu">
+                  <button class="advanced-sort-toggle" id="advancedSortToggle" type="button" aria-controls="advancedSortPanel" aria-expanded="false">
+                    <span>Sort</span>
+                    <small>Advanced</small>
+                  </button>
+                  <div class="advanced-sort-panel" id="advancedSortPanel" hidden>
+                    <h3>Sort By</h3>
+                    <button class="advanced-sort-choice" type="button" data-advanced-sort="unknownDescription">
+                      <span class="sort-radio" aria-hidden="true"></span>
+                      <strong>Unknown Product Description</strong>
+                    </button>
+                    <button class="advanced-sort-choice" type="button" data-advanced-sort="aboveDt">
+                      <span class="sort-radio" aria-hidden="true"></span>
+                      <strong>Above Drug Tariff</strong>
+                    </button>
+                    <button class="advanced-sort-choice" type="button" data-advanced-sort="activeConcession">
+                      <span class="sort-radio" aria-hidden="true"></span>
+                      <strong>Active Concession</strong>
+                    </button>
+                    <button class="advanced-sort-choice" type="button" data-advanced-sort="controlledDrug">
+                      <span class="sort-radio" aria-hidden="true"></span>
+                      <strong>Controlled Drugs</strong>
+                    </button>
+                    <button class="advanced-sort-choice" type="button" data-advanced-sort="fridgeLines">
+                      <span class="sort-radio" aria-hidden="true"></span>
+                      <strong>Fridge Lines</strong>
+                    </button>
+                    <button class="advanced-sort-choice" type="button" data-advanced-sort="highValueLines">
+                      <span class="sort-radio" aria-hidden="true"></span>
+                      <strong>High Value Lines over &pound;100</strong>
+                    </button>
+                    <div class="advanced-sort-choice selected-price-choice" data-selected-price-choice>
+                      <button type="button" data-select-price-sort>
+                        <span class="sort-radio" aria-hidden="true"></span>
+                        <strong>Selected Supplier Price</strong>
+                      </button>
+                      <div class="sort-direction-toggle" aria-label="Selected supplier price sort direction">
+                        <button type="button" data-advanced-sort="selectedPrice" data-direction="asc">Low-High</button>
+                        <button type="button" data-advanced-sort="selectedPrice" data-direction="desc">High-Low</button>
+                      </div>
+                    </div>
+                    <button class="advanced-reset" id="resetAdvancedSort" type="button">Reset All</button>
+                  </div>
+                </div>
+              </div>
+              </div>
+              <div class="basket-summary-kpis" aria-label="Order Basket totals">
+                <div>
+                  <strong id="totalProducts">0</strong>
+                  <span>Products</span>
+                </div>
+                <div>
+                  <strong id="totalValue">&pound;0.00</strong>
+                  <span>Order Value</span>
+                </div>
+                <div>
+                  <strong id="potentialSavings">&pound;0.00</strong>
+                  <span>Potential Savings</span>
+                </div>
+              </div>
+            </div>
+            <section class="brand-opportunity-banner" id="brandOpportunityBanner" aria-label="Cheaper alternatives" hidden>
+              <div class="brand-banner-copy">
+                <span class="brand-banner-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M8.4 15.5a7 7 0 1 1 7.2 0c-.8.5-1.2 1.2-1.2 2.1H9.6c0-.9-.4-1.6-1.2-2.1Z"></path></svg>
+                </span>
+                <strong id="brandOpportunityCount">0 cheaper alternatives available</strong>
+                <span class="brand-banner-divider" aria-hidden="true">&middot;</span>
+                <strong class="brand-banner-saving" id="brandOpportunitySaving">Save up to &pound;0.00</strong>
+              </div>
+              <div class="brand-banner-actions">
+                <button class="brand-view-suggestions" id="viewBrandSuggestions" type="button" aria-controls="brandSuggestionsDrawer">View Suggestions <span aria-hidden="true">&rsaquo;</span></button>
+                <button class="brand-banner-dismiss" id="dismissBrandBanner" type="button" aria-label="Dismiss cheaper alternatives banner">&times;</button>
+              </div>
+            </section>
+            <div class="sort-status" id="sortStatus" hidden></div>
+            <div class="product-list" id="productList"></div>
+            <div class="empty-state" id="emptyState" hidden>
+              <h3>No products in the basket</h3>
+              <p>Search above or use Quick Order to start your order.</p>
+            </div>
+          </section>
+
+          <aside class="utility-sidebar" aria-label="Quick Order">
+            <div class="quick-order-sidebar-mount" id="quickOrderSidebarMount">
+              <section class="quick-order-panel" aria-labelledby="quickOrderTitle">
+                <button class="quick-order-heading" id="quickOrderToggle" type="button" aria-expanded="true" aria-controls="quickOrderContent" aria-label="Collapse Quick Order" title="Collapse Quick Order">
+                  <span id="quickOrderTitle">Quick Order</span>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m15 6-6 6 6 6"></path>
+                  </svg>
+                </button>
+                <div class="quick-order-content" id="quickOrderContent">
+                  <div class="quick-order-tabs" role="tablist" aria-label="Quick Order products">
+                    <button class="quick-order-tab active" id="frequentlyOrderedTab" type="button" role="tab" aria-selected="true" aria-controls="quickOrderResults" data-quick-order-view="frequent">Frequently Ordered</button>
+                    <button class="quick-order-tab" id="favouritesTab" type="button" role="tab" aria-selected="false" aria-controls="quickOrderResults" data-quick-order-view="favourites"><span aria-hidden="true">★</span> Favourites</button>
+                  </div>
+                  <label class="quick-order-search">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="11" cy="11" r="7"></circle>
+                      <path d="m16 16 4 4"></path>
+                    </svg>
+                    <input id="quickOrderSearch" type="search" autocomplete="off" placeholder="Search quick-order products..." aria-label="Search quick-order products" />
+                  </label>
+                  <div class="quick-order-results" id="quickOrderResults" role="tabpanel" aria-labelledby="frequentlyOrderedTab"></div>
+                  <div class="quick-order-footer" id="quickOrderFooter"></div>
+                </div>
+              </section>
+            </div>
+          </aside>
+        </div>
+        <footer class="site-footer">© 2019-2026 Cascade Plus. All rights reserved. Powered by LuxshTech.</footer>
+      </main>
+    </div>
+
+    <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+    <aside class="product-drawer" id="productDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true">
+      <div class="drawer-header">
+        <h2 id="drawerTitle">Edit Product</h2>
+        <button class="icon-close" id="closeDrawer" type="button" aria-label="Close Edit Product">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m6 6 12 12M18 6 6 18"></path>
+          </svg>
+        </button>
+      </div>
+      <div id="drawerContent"></div>
+      <div class="drawer-footer-row">
+        <p class="drawer-info-note">Prices shown are based on your negotiated discount and may vary.</p>
+        <div class="drawer-navigation" id="drawerNavigation" hidden></div>
+      </div>
+    </aside>
+
+    <div class="brand-drawer-backdrop" id="brandDrawerBackdrop" hidden></div>
+    <aside class="brand-suggestions-drawer" id="brandSuggestionsDrawer" role="dialog" aria-modal="false" aria-labelledby="brandDrawerTitle" aria-hidden="true">
+      <header class="brand-drawer-header">
+        <div>
+          <h2 id="brandDrawerTitle">Cheaper Alternatives (0)</h2>
+          <p>Approved lower-cost alternatives for products in your basket.</p>
+          <p class="brand-drawer-helper">Select multiple items to switch together.</p>
+        </div>
+        <button class="brand-drawer-close" id="closeBrandDrawer" type="button" aria-label="Close cheaper alternatives">&times;</button>
+      </header>
+      <div class="brand-drawer-summary">
+        <div class="brand-summary-total">
+          <span id="brandDrawerSummaryLabel">Total potential saving</span>
+          <strong id="brandDrawerTotal" aria-live="polite">&pound;0.00</strong>
+        </div>
+        <div class="brand-summary-context">
+          <strong>Based on <span id="brandDrawerItemCount">0</span><span id="brandDrawerBasisSuffix"> items</span></strong>
+          <span id="brandDrawerScopeNote">Savings apply to affected items only, not your entire basket.</span>
+        </div>
+      </div>
+      <div class="brand-drawer-message" id="brandDrawerMessage" hidden></div>
+      <div class="brand-opportunity-list" id="brandOpportunityList" aria-live="polite"></div>
+      <footer class="brand-drawer-footer">
+        <button class="brand-keep-original" id="keepAllOriginal" type="button">Keep All Original</button>
+        <button class="brand-switch-all" id="switchAllBrands" type="button">
+          <strong><span class="brand-switch-icon" aria-hidden="true">&#8644;</span> <span id="brandBulkActionLabel">Switch All</span> <span id="brandSwitchAllCount">0</span></strong>
+          <small id="brandBulkSaving">Save &pound;0.00</small>
+        </button>
+      </footer>
+    </aside>
+
+    <dialog class="brand-switch-modal" id="brandSwitchModal" aria-labelledby="brandSwitchModalTitle">
+      <button class="brand-modal-close" id="closeBrandSwitchModal" type="button" aria-label="Close">&times;</button>
+      <h2 id="brandSwitchModalTitle">Switch this product?</h2>
+      <div id="brandSwitchModalContent"></div>
+      <div class="brand-modal-actions">
+        <button class="secondary-action" id="cancelBrandSwitch" type="button">Cancel</button>
+        <button class="primary-action" id="confirmBrandSwitch" type="button">Switch Product</button>
+      </div>
+    </dialog>
+
+    <dialog class="order-modal" id="orderModal" role="dialog" aria-modal="true" aria-labelledby="orderModalTitle" aria-describedby="orderModalSummary">
+      <button class="icon-close" data-close-modal type="button" aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m6 6 12 12M18 6 6 18"></path>
+        </svg>
+      </button>
+      <div class="warning-icon" aria-hidden="true">!</div>
+      <h2 id="orderModalTitle" tabindex="-1">Are you sure?</h2>
+      <p id="orderModalSummary"></p>
+      <section class="order-attention-summary" id="orderModalAttention" aria-labelledby="orderModalAttentionTitle" hidden>
+        <h3 id="orderModalAttentionTitle">This order contains products requiring attention:</h3>
+        <div class="order-attention-categories" id="orderModalCategories"></div>
+      </section>
+      <p class="order-attention-description" id="orderModalDescription" hidden>
+        These products may require additional handling, storage or financial consideration. Please review your order before submitting.
+      </p>
+      <div class="modal-actions">
+        <button class="secondary-action" id="orderModalCancel" data-close-modal type="button">No</button>
+        <button class="primary-action" id="confirmOrder" type="button">Yes</button>
+      </div>
+    </dialog>
+
+    <dialog class="order-modal success-modal" id="orderSuccessModal" aria-labelledby="orderSuccessTitle" aria-describedby="orderSuccessSummary">
+      <div class="success-icon" aria-hidden="true">&#10003;</div>
+      <h2 id="orderSuccessTitle">Order Placed Successfully</h2>
+      <p id="orderSuccessSummary">You can check the details in Order History</p>
+      <div class="modal-actions">
+        <button class="primary-action" data-close-modal type="button">Close</button>
+      </div>
+    </dialog>
+
+    <div class="toast-region" id="toastRegion" aria-live="polite"></div>
+    <script src="account-menu.js"></script>
+    <script src="orderhistory-data.js"></script>
+    <script src="order-pad-quick-order.js"></script>
+    <script src="order-pad-cart-flags.js"></script>
+    <script src="price-override.js"></script>
+    <script src="supplier-lock.js"></script>
+    <script src="daily-threshold.js"></script>
+    <script src="order-pad-catalogue.js"></script>
+    <script src="brand-equalisation.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

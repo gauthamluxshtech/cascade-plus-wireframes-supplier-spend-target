@@ -1,0 +1,1392 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CASCADE Help & Support</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        .workspace {
+            max-width: 1580px;
+            margin: 0 auto;
+            padding: 22px 24px 34px;
+        }
+
+        .page-heading {
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin: 0 0 24px;
+        }
+
+        .heading-copy {
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .page-heading h1 {
+            margin: 0;
+            color: #050b18;
+            font-size: 30px;
+            line-height: 1.1;
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+
+        .page-heading p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .help-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 500px;
+            gap: 22px;
+            align-items: start;
+        }
+
+        .form-stack,
+        .side-stack {
+            display: grid;
+            gap: 20px;
+        }
+
+        .support-panel,
+        .side-panel {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 8px 22px rgba(23, 33, 47, 0.06);
+        }
+
+        .support-panel {
+            padding: 22px;
+        }
+
+        .help-mode-toggle {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 150px));
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .help-mode-option {
+            min-height: 44px;
+            border: 1px solid #dce2ea;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: #344054;
+            background: #fff;
+            font-size: 14px;
+            font-weight: 800;
+            box-shadow: 0 1px 2px rgba(23, 33, 47, 0.04);
+        }
+
+        .help-mode-option svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-width: 2;
+        }
+
+        .help-mode-option.active,
+        .help-mode-option:hover,
+        .help-mode-option:focus-visible {
+            color: #065f46;
+            background: #effaf7;
+            border-color: #e7f0f2;
+            outline: 0;
+        }
+
+        .panel-title-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .panel-icon {
+            width: 44px;
+            height: 44px;
+            flex: 0 0 auto;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #065f46;
+            background: #dff8ed;
+        }
+
+        .panel-icon svg,
+        .contact-icon svg,
+        .section-icon svg,
+        .submit-button svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-width: 2;
+        }
+
+        .panel-title-row h2,
+        .side-panel h2 {
+            margin: 0;
+            color: #050b18;
+            font-size: 16px;
+            line-height: 1.3;
+            font-weight: 700;
+        }
+
+        .panel-title-row p {
+            margin: 3px 0 0;
+            color: #344054;
+            font-size: 13px;
+            font-weight: 400;
+        }
+
+        .support-form {
+            display: grid;
+            gap: 15px;
+        }
+
+        .field {
+            display: grid;
+            gap: 8px;
+            color: #061a33;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .field>span,
+        .priority-label,
+        .attachment-label {
+            color: #596273;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            width: 100%;
+            border: 1px solid #cfd6df;
+            border-radius: 8px;
+            padding: 0 16px;
+            color: #061a33;
+            background: #fff;
+            font: inherit;
+            font-weight: 400;
+            outline: 0;
+            transition: border-color 150ms ease, box-shadow 150ms ease;
+        }
+
+        .field input,
+        .field select {
+            height: 38px;
+        }
+
+        .field textarea {
+            min-height: 58px;
+            resize: vertical;
+            padding-top: 12px;
+            line-height: 1.45;
+        }
+
+        .field input::placeholder,
+        .field textarea::placeholder {
+            color: #7c8594;
+        }
+
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+            border-color: #065f46;
+            box-shadow: 0 0 0 3px rgba(6, 95, 70, 0.13);
+        }
+
+        .attachment-field {
+            display: grid;
+            gap: 8px;
+        }
+
+        .attachment-label span {
+            color: #344054;
+            font-weight: 500;
+            text-transform: none;
+        }
+
+        .attachment-dropzone {
+            min-height: 55px;
+            border: 1px dashed #cfd6df;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            padding: 16px;
+            color: #17212f;
+            background: #fff;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+        }
+
+        .attachment-dropzone:hover,
+        .attachment-dropzone:focus-within {
+            border-color: #7c6df2;
+            background: #fbfaff;
+            box-shadow: 0 0 0 3px rgba(124, 109, 242, 0.12);
+        }
+
+        .attachment-dropzone input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
+        }
+
+        .attachment-copy {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .attachment-copy svg {
+            width: 21px;
+            height: 21px;
+            flex: 0 0 auto;
+            color: #065f46;
+            fill: currentColor;
+            stroke: none;
+        }
+
+        .attachment-copy strong {
+            display: block;
+            color: #344054;
+            font-size: 13px;
+            font-weight: 400;
+            line-height: 1.25;
+        }
+
+        .attachment-copy small {
+            display: block;
+            margin-top: 4px;
+            color: #596273;
+            font-size: 12px;
+            font-weight: 350;
+            line-height: 1.3;
+        }
+
+        .priority-field {
+            display: grid;
+            gap: 9px;
+        }
+
+        .priority-options {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .priority-option {
+            min-height: 36px;
+            border: 0;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #061a33;
+            background: #f0f1f4;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .priority-option.active {
+            color: #fff;
+        }
+
+        .priority-option[data-priority="low"].active {
+            background: #10b981;
+        }
+
+        .priority-option[data-priority="medium"].active {
+            background: #df9100;
+        }
+
+        .priority-option[data-priority="high"].active {
+            background: #ff1723;
+        }
+
+        .form-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .submit-button {
+            min-height: 44px;
+            border: 0;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #fff;
+            background: #047857;
+            font-size: 16px;
+            font-weight: 700;
+            box-shadow: 0 12px 22px rgba(6, 95, 70, 0.18);
+        }
+
+        .cancel-button {
+            min-height: 44px;
+            border: 1px solid #cfd6df;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #344054;
+            background: #fff;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .submit-button:hover,
+        .submit-button:focus-visible {
+            background: #064e3b;
+            outline: 0;
+        }
+
+        .cancel-button:hover,
+        .cancel-button:focus-visible {
+            color: #065f46;
+            border-color: #065f46;
+            background: #effaf7;
+            outline: 0;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 30;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.38);
+        }
+
+        .modal-backdrop[hidden] {
+            display: none;
+        }
+
+        .help-modal {
+            width: min(100%, 430px);
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.22);
+            padding: 22px;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #050b18;
+            font-size: 18px;
+            line-height: 1.25;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            width: 28px;
+            height: 28px;
+            border: 0;
+            border-radius: 6px;
+            display: inline-grid;
+            place-items: center;
+            color: #475467;
+            background: transparent;
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .modal-close:hover,
+        .modal-close:focus-visible {
+            color: #065f46;
+            background: #effaf7;
+            outline: 0;
+        }
+
+        .cancel-modal-copy {
+            margin: 0 0 20px;
+            color: #047857;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+        .modal-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .modal-secondary,
+        .modal-primary {
+            min-height: 40px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .modal-secondary {
+            border: 1px solid #cfd6df;
+            color: #344054;
+            background: #fff;
+        }
+
+        .modal-primary {
+            border: 0;
+            color: #fff;
+            background: #065f46;
+        }
+
+        .next-steps {
+            display: grid;
+            gap: 18px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .next-step {
+            display: grid;
+            grid-template-columns: 42px minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+        }
+
+        .next-step-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            display: inline-grid;
+            place-items: center;
+            color: #5b4df5;
+            background: #f1efff;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .next-step-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-width: 2;
+        }
+
+        .next-step-icon.feedback {
+            color: #fff;
+            background: #065f46;
+        }
+
+        .next-step-text strong {
+            display: block;
+            color: #050b18;
+            font-size: 14px;
+            line-height: 1.25;
+        }
+
+        .next-step-text span {
+            display: block;
+            margin-top: 6px;
+            color: #344054;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .next-steps.feedback {
+            position: relative;
+            gap: 28px;
+        }
+
+        .next-steps.feedback::before {
+            content: "";
+            position: absolute;
+            top: 30px;
+            bottom: 30px;
+            left: 16px;
+            width: 1px;
+            background: #cfeee2;
+        }
+
+        .next-steps.feedback .next-step {
+            position: relative;
+            grid-template-columns: 34px minmax(0, 1fr);
+            gap: 14px;
+        }
+
+        .next-steps.feedback .next-step-icon {
+            z-index: 1;
+            width: 24px;
+            height: 24px;
+            margin-top: 1px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .feedback-modal-heading {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .feedback-heading-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            display: inline-grid;
+            place-items: center;
+            color: #065f46;
+            background: #dff8ed;
+        }
+
+        .feedback-heading-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: currentColor;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-width: 2;
+        }
+
+        .side-panel {
+            padding: 24px 22px;
+        }
+
+        .side-heading {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #065f46;
+            background: #dff8ed;
+        }
+
+        .section-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            stroke: none;
+        }
+
+        .contact-panel {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+            gap: 28px;
+            align-items: center;
+            padding: 24px 30px;
+            background: linear-gradient(90deg, #f0fdf7 0%, #f8fff9 100%);
+        }
+
+        .urgent-help-copy {
+            display: grid;
+            grid-template-columns: 30px minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+        }
+
+        .urgent-help-info-icon {
+            width: 30px;
+            height: 30px;
+            display: inline-grid;
+            place-items: center;
+            border-radius: 999px;
+            color: #ffffff;
+            background: #2e8165;
+            font-size: 15px;
+            line-height: 1;
+            font-weight: 900;
+        }
+
+        .urgent-help-copy h2 {
+            margin: 0 0 10px;
+            color: #050b18;
+            font-size: 16px;
+            line-height: 1.45;
+            font-weight: 700;
+        }
+
+        .urgent-help-copy p {
+            margin: 0;
+            color: #344054;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .contact-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px;
+            align-items: center;
+        }
+
+        .contact-item {
+            display: grid;
+            grid-template-columns: 30px minmax(0, 1fr);
+            gap: 12px;
+            align-items: center;
+        }
+
+        .contact-icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .contact-icon.blue,
+        .contact-icon.green {
+            color: #065f46;
+            background: transparent;
+        }
+
+        .contact-icon.blue svg,
+        .contact-icon.green svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+            stroke: none;
+        }
+
+        .contact-copy strong {
+            display: block;
+            color: #050b18;
+            font-size: 14px;
+            line-height: 1.25;
+            font-weight: 700;
+        }
+
+        .contact-copy span,
+        .contact-copy a {
+            display: block;
+            margin-top: 5px;
+            color: #17212f;
+            font-size: 13px;
+            line-height: 1.25;
+            text-decoration: none;
+        }
+
+        .contact-copy small {
+            display: block;
+            color: #667085;
+            font-size: 12px;
+            line-height: 1.35;
+        }
+
+        .faq-list {
+            display: grid;
+            gap: 14px;
+        }
+
+        .faq-item summary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #050b18;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .faq-item summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .faq-item summary::before {
+            content: "";
+            width: 0;
+            height: 0;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 7px solid #111827;
+            transition: transform 150ms ease;
+        }
+
+        .faq-item[open] summary::before {
+            transform: rotate(90deg);
+        }
+
+        .faq-item p {
+            margin: 10px 0 0 16px;
+            max-width: 420px;
+            color: #344054;
+            font-size: 12px;
+            line-height: 1.55;
+        }
+
+        .before-send-panel {
+            padding: 22px 20px;
+        }
+
+        .before-send-heading {
+            display: grid;
+            grid-template-columns: 48px minmax(0, 1fr);
+            gap: 14px;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .before-send-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #065f46;
+            background: #dff8ed;
+        }
+
+        .before-send-icon svg {
+            width: 27px;
+            height: 27px;
+            fill: currentColor;
+            stroke: none;
+        }
+
+        .before-send-heading h2 {
+            margin: 0 0 5px;
+        }
+
+        .before-send-heading p {
+            margin: 0;
+            color: #667085;
+            font-size: 13px;
+            line-height: 1.35;
+        }
+
+        .before-send-list {
+            display: grid;
+            gap: 13px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .before-send-list li {
+            display: grid;
+            grid-template-columns: 22px minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+            color: #344054;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .check-icon {
+            position: relative;
+            width: 19px;
+            height: 19px;
+            border: 2px solid #065f46;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #065f46;
+        }
+
+        .check-icon::after {
+            content: "";
+            width: 7px;
+            height: 4px;
+            border-left: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: translateY(-1px) rotate(-45deg);
+        }
+
+        @media (max-width: 1100px) {
+            .help-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-panel .contact-list {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 760px) {
+            .workspace {
+                padding: 18px 14px 28px;
+            }
+
+            .help-mode-toggle {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .side-stack,
+            .contact-panel,
+            .contact-panel .contact-list {
+                grid-template-columns: 1fr;
+            }
+
+            .priority-options {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="navigation.css" />
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <a class="brand" href="index.html" aria-label="CASCADE home">
+                <img class="brand-logo" src="logo.png" alt="CASCADE Plus" />
+            </a>
+            <nav class="main-nav" aria-label="Primary">
+                <a href="Dashboard.html">Dashboard</a>
+                <a href="index.html">Order Pad</a>
+                <a href="history.html">Order History</a>
+                <a href="report.html">Reports</a>
+                <a class="active" href="help.html" aria-current="page">Help</a>
+                <div class="nav-more">
+                    <button class="more-toggle" type="button" aria-haspopup="true" aria-expanded="false">More</button>
+                    <div class="more-menu" role="menu">
+                        <a href="pending.html" role="menuitem">Pending Order</a>
+                        <a href="outofstock.html" role="menuitem">Out Of Stock</a>
+                        <a href="settings.html" role="menuitem">Settings</a>
+                    </div>
+                </div>
+            </nav>
+            <div class="account-menu">
+                <button class="profile-button" type="button" aria-haspopup="true" aria-expanded="false">HI,
+                    DUMMY1</button>
+                <div class="account-dropdown" role="menu">
+                    <button class="account-menu-item" type="button" role="menuitem">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M3 11.5 12 4l9 7.5"></path>
+                            <path d="M5.5 10.5V20h13v-9.5"></path>
+                            <path d="M9.5 17h5"></path>
+                            <path d="M9 14h2"></path>
+                            <path d="M13 14h2"></path>
+                        </svg>
+                        Reset Password
+                    </button>
+                    <span class="account-menu-separator" aria-hidden="true"></span>
+                    <button class="account-menu-item" type="button" role="menuitem">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="7.5" cy="16.5" r="3"></circle>
+                            <path d="m10 14 7.5-7.5"></path>
+                            <path d="m15.5 8.5 2 2"></path>
+                            <path d="m18 6 2 2"></path>
+                        </svg>
+                        Log Out
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="workspace">
+            <section class="page-heading" aria-labelledby="helpTitle">
+                <div class="heading-copy">
+                    <h1 id="helpTitle">Help &amp; Support</h1>
+                    <p>Get assistance with your questions and issues</p>
+                </div>
+            </section>
+
+            <div class="help-layout">
+                <div class="form-stack">
+                    <section class="support-panel" aria-labelledby="supportRequestTitle">
+                        <div class="help-mode-toggle" role="tablist" aria-label="Help request type">
+                            <button class="help-mode-option active" type="button" role="tab" aria-selected="true"
+                                data-help-mode="support">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z">
+                                    </path>
+                                </svg>
+                                Support
+                            </button>
+                            <button class="help-mode-option" type="button" role="tab" aria-selected="false"
+                                data-help-mode="feedback">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <polygon
+                                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                                    </polygon>
+                                </svg>
+                                Feedback
+                            </button>
+                        </div>
+
+                        <div class="panel-title-row">
+                            <span class="panel-icon" id="supportRequestIcon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z">
+                                    </path>
+                                </svg>
+                            </span>
+                            <div>
+                                <h2 id="supportRequestTitle">Submit a Support Request</h2>
+                                <p id="supportRequestSubtitle" hidden></p>
+                            </div>
+                        </div>
+
+                        <form class="support-form">
+                            <label class="field">
+                                <span>Category *</span>
+                                <select id="requestCategory" required aria-label="Category">
+                                    <option value="">Select a category...</option>
+                                    <option>Account Access</option>
+                                    <option>Ordering Issue</option>
+                                    <option>Pricing Issue</option>
+                                    <option>Supplier Issue</option>
+                                    <option>Report Issue</option>
+                                    <option>Technical Issue</option>
+                                    <option>Other</option>
+                                </select>
+                            </label>
+
+                            <label class="field">
+                                <span>Subject *</span>
+                                <input type="text" required placeholder="Brief description of your issue..." />
+                            </label>
+
+                            <div class="priority-field">
+                                <span class="priority-label">Priority</span>
+                                <div class="priority-options" role="radiogroup" aria-label="Priority">
+                                    <button class="priority-option active" type="button" data-priority="low"
+                                        role="radio" aria-checked="true">Low</button>
+                                    <button class="priority-option" type="button" data-priority="medium" role="radio"
+                                        aria-checked="false">Medium</button>
+                                    <button class="priority-option" type="button" data-priority="high" role="radio"
+                                        aria-checked="false">High</button>
+                                </div>
+                            </div>
+
+                            <label class="field">
+                                <span>Description *</span>
+                                <textarea required
+                                    placeholder="Please provide detailed information about your question or issue..."></textarea>
+                            </label>
+
+                            <div class="attachment-field">
+                                <span class="attachment-label">Attachments <span>(Optional)</span></span>
+                                <label class="attachment-dropzone">
+                                    <input type="file" multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx" />
+                                    <span class="attachment-copy">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path
+                                                d="M8.2 19.5a5.7 5.7 0 0 1-1.6-11.2A7.2 7.2 0 0 1 20.2 10a4.8 4.8 0 0 1-1 9.5h-3.1v-5.2h2.2L12 8l-6.3 6.3h2.2v5.2H8.2Zm2.1 0v-6.9H8.9L12 9.5l3.1 3.1h-1.4v6.9h-3.4Z">
+                                            </path>
+                                        </svg>
+                                        <span>
+                                            <strong>Drag and drop files here or click to browse</strong>
+                                            <small>Max file size 10MB. Supported: JPG, PNG, PDF, DOC, XLS</small>
+                                        </span>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="form-actions">
+                                <button class="submit-button" type="submit">
+                                    Submit
+                                </button>
+                                <button class="cancel-button" type="button" id="cancelRequestButton">Cancel</button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <section class="side-panel contact-panel" aria-labelledby="contactTitle">
+                        <div class="urgent-help-copy">
+                            <span class="urgent-help-info-icon" aria-hidden="true">i</span>
+                            <div>
+                                <h2 id="contactTitle">Need urgent help?</h2>
+                                <p>If you need immediate assistance, please contact our support team.</p>
+                            </div>
+                        </div>
+
+                        <div class="contact-list">
+                            <div class="contact-item">
+                                <span class="contact-icon blue" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <path
+                                            d="M7.1 2.7c.6-.2 1.3.1 1.6.7l2 4.5c.2.5.1 1.1-.3 1.5L8.8 11a13.2 13.2 0 0 0 4.2 4.2l1.7-1.6c.4-.4 1-.5 1.5-.3l4.4 2c.6.3.9.9.7 1.6l-1 3.8c-.2.6-.7 1-1.4 1A16.7 16.7 0 0 1 2.3 5.1c0-.7.4-1.2 1-1.4l3.8-1Z">
+                                        </path>
+                                    </svg>
+                                </span>
+                                <p class="contact-copy">
+                                    <strong>Phone Support</strong>
+                                    <span>07385415650</span>
+                                    <small>Mon-Fri, 9am-6pm EST</small>
+                                </p>
+                            </div>
+
+                            <div class="contact-item">
+                                <span class="contact-icon green" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <path
+                                            d="M3.8 5h16.4c1 0 1.8.8 1.8 1.8v10.4c0 1-.8 1.8-1.8 1.8H3.8c-1 0-1.8-.8-1.8-1.8V6.8C2 5.8 2.8 5 3.8 5Zm.1 2 7.4 5.4c.4.3 1 .3 1.4 0L20.1 7H3.9Z">
+                                        </path>
+                                    </svg>
+                                </span>
+                                <p class="contact-copy">
+                                    <strong>Email Support</strong>
+                                    <span>info@cascadeplus.co.uk</span>
+                                    <small>24-48 hour response</small>
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <aside class="side-stack">
+                    <section class="side-panel" aria-labelledby="faqTitle">
+                        <div class="side-heading">
+                            <span class="section-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path
+                                        d="M10.4 15.6v-.5c0-1 .3-1.9.8-2.5.4-.5 1-1 1.6-1.4.5-.4.9-.7 1.1-1 .3-.3.4-.7.4-1.2 0-.6-.2-1-.6-1.4-.4-.3-.9-.5-1.6-.5-.7 0-1.2.2-1.7.6-.5.4-.8 1-1 1.7L6.2 8.2c.4-1.3 1.1-2.3 2.2-3.1C9.5 4.4 10.8 4 12.3 4c1.8 0 3.2.4 4.2 1.3 1.1.9 1.6 2.1 1.6 3.5 0 .9-.2 1.6-.5 2.2-.3.6-.7 1.1-1.2 1.5-.5.4-1.1.9-1.8 1.3-.5.4-.9.8-1.1 1.1-.2.3-.4.7-.4 1.2v.4h-2.7Zm1.4 5.1c-.7 0-1.2-.2-1.6-.6-.4-.4-.6-.9-.6-1.5s.2-1.1.6-1.5c.4-.4 1-.6 1.6-.6.7 0 1.2.2 1.6.6.4.4.6.9.6 1.5s-.2 1.1-.6 1.5c-.4.4-1 .6-1.6.6Z">
+                                    </path>
+                                </svg>
+                            </span>
+                            <h2 id="faqTitle">Frequently Asked Questions</h2>
+                        </div>
+
+                        <div class="faq-list">
+                            <details class="faq-item">
+                                <summary>How do I compare prices across wholesalers?</summary>
+                                <p>Navigate to the <strong>Order Pad</strong>, click on any product line in the
+                                    <strong>Order Basket</strong>, and view the product details with the supplier
+                                    comparison table. You can choose any supplier, and click Save. The basket will
+                                    refresh with
+                                    the updated quantity, pricing, and order value.
+                                </p>
+                            </details>
+                            <details class="faq-item">
+                                <summary>How do I add products to my order basket?</summary>
+                                <p>Go to the <strong>Order Pad</strong>, search for the product name or PIP code, enter
+                                    the required quantity, and add it to the basket. You can also upload products using
+                                    the Upload Order option if you have an .xls or .csv file or download the template.
+                                </p>
+                            </details>
+                            <details class="faq-item">
+                                <summary>How do I change the quantity of a product in my basket?</summary>
+                                <p>Click on any product line you want to change the quantity in the <strong>Order
+                                        Basket</strong>,
+                                    in the Edit product window change the quantity and click Save. The basket will
+                                    refresh with
+                                    the updated quantity, pricing, and order value.</p>
+                            </details>
+                            <details class="faq-item">
+                                <summary>What does "Out of Stock" mean?</summary>
+                                <p>Out of Stock means the selected supplier could not fulfil the requested product
+                                    quantity. You can review these lines in the <strong>Out of Stock</strong> section
+                                    and add selected items back to your order when needed.</p>
+                            </details>
+                            <details class="faq-item">
+                                <summary>Where can I view my previous orders?</summary>
+                                <p>Go to <strong>Order History</strong> to view past orders, order status, submitted
+                                    products, fulfilled quantities, and supplier outcomes. Click an order to open the
+                                    detailed view.</p>
+                            </details>
+                        </div>
+                    </section>
+
+                    <section class="side-panel before-send-panel" aria-labelledby="beforeSendTitle">
+                        <div class="before-send-heading">
+                            <span class="before-send-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path
+                                        d="M12 2.2A7.2 7.2 0 0 0 7.7 15c.8.6 1.1 1.3 1.2 2.1h6.2c.1-.8.4-1.5 1.2-2.1A7.2 7.2 0 0 0 12 2.2ZM9.5 20.7c0 .6.5 1.1 1.1 1.1h2.8c.6 0 1.1-.5 1.1-1.1v-.6h-5v.6Zm-.2-2.3h5.4c.3 0 .6-.3.6-.6s-.3-.6-.6-.6H9.3c-.3 0-.6.3-.6.6s.3.6.6.6Zm1-10.8a3.6 3.6 0 0 0-1.2 2.7.7.7 0 1 1-1.4 0 5 5 0 0 1 1.7-3.8.7.7 0 0 1 .9 1.1Z">
+                                    </path>
+                                </svg>
+                            </span>
+                            <div>
+                                <h2 id="beforeSendTitle">Before you send</h2>
+                                <p>Please check the following:</p>
+                            </div>
+                        </div>
+
+                        <ul class="before-send-list">
+                            <li><span class="check-icon" aria-hidden="true"></span><span>Search FAQs - your answer
+                                    might already be there.</span></li>
+                            <li><span class="check-icon" aria-hidden="true"></span><span>Provide as much detail as
+                                    possible for faster support.</span></li>
+                            <li><span class="check-icon" aria-hidden="true"></span><span>Add Attachments - Screenshots
+                                    or documents can help explain the issue.</span></li>
+                        </ul>
+                    </section>
+
+                </aside>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-backdrop" id="cancelConfirmModal" hidden>
+        <section class="help-modal" role="dialog" aria-modal="true" aria-labelledby="cancelConfirmTitle">
+            <div class="modal-header">
+                <h2 id="cancelConfirmTitle">Cancel request?</h2>
+                <button class="modal-close" type="button" data-close-modal aria-label="Close">&times;</button>
+            </div>
+            <p class="cancel-modal-copy">Are you sure you want to cancel? Any information entered in the form will be
+                cleared.</p>
+            <div class="modal-actions">
+                <button class="modal-primary" type="button" id="confirmCancelButton">Yes</button>
+                <button class="modal-secondary" type="button" data-close-modal>No</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal-backdrop" id="nextStepsModal" hidden>
+        <section class="help-modal" role="dialog" aria-modal="true" aria-labelledby="nextStepsTitle">
+            <div class="modal-header">
+                <div class="feedback-modal-heading" id="nextStepsHeading">
+                    <h2 id="nextStepsTitle">What happens next?</h2>
+                </div>
+                <button class="modal-close" type="button" data-close-modal aria-label="Close">&times;</button>
+            </div>
+            <div id="nextStepsContent"></div>
+        </section>
+    </div>
+
+    <script src="account-menu.js"></script>
+    <script>
+        const supportForm = document.querySelector(".support-form");
+        const cancelConfirmModal = document.getElementById("cancelConfirmModal");
+        const nextStepsModal = document.getElementById("nextStepsModal");
+        const nextStepsHeading = document.getElementById("nextStepsHeading");
+        const nextStepsContent = document.getElementById("nextStepsContent");
+        const adminEmailAddress = "support@cascadeplus.com";
+
+        function addSubmittedFeedback() {
+            const subject = supportForm.querySelector('input[type="text"]').value.trim();
+            const description = supportForm.querySelector("textarea").value.trim();
+            if (!subject || !description) return;
+
+            const feedback = {
+                title: subject,
+                description,
+            };
+
+            notifyAdminOfFeedback(feedback);
+        }
+
+        function notifyAdminOfFeedback(feedback) {
+            const subject = encodeURIComponent(`New Cascade Plus feedback: ${feedback.title}`);
+            const body = encodeURIComponent(`A user submitted new feedback:\n\n${feedback.title}\n\n${feedback.description}`);
+            window.open(`mailto:${adminEmailAddress}?subject=${subject}&body=${body}`, "_blank");
+        }
+
+        function getActiveHelpMode() {
+            return document.querySelector(".help-mode-option.active")?.dataset.helpMode || "support";
+        }
+
+        function openModal(modal) {
+            modal.hidden = false;
+        }
+
+        function closeModal(modal) {
+            modal.hidden = true;
+        }
+
+        function resetSupportForm() {
+            supportForm.reset();
+            document.querySelectorAll(".priority-option").forEach((item) => {
+                item.classList.remove("active");
+                item.setAttribute("aria-checked", "false");
+            });
+            const lowPriority = document.querySelector('.priority-option[data-priority="low"]');
+            lowPriority.classList.add("active");
+            lowPriority.setAttribute("aria-checked", "true");
+        }
+
+        function renderSupportNextSteps() {
+            nextStepsHeading.innerHTML = `
+                <span class="feedback-heading-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M22 2 11 13"></path><path d="m22 2-7 20-4-9-9-4z"></path></svg>
+                </span>
+                <h2 id="nextStepsTitle">What happens next?</h2>
+            `;
+            nextStepsContent.innerHTML = `
+                <ol class="next-steps feedback">
+                    <li class="next-step">
+                        <span class="next-step-icon feedback" aria-hidden="true">1</span>
+                        <span class="next-step-text">
+                            <strong>We have successfully received your request</strong>
+                            <span>Our support team will review your request and confirm receipt.</span>
+                        </span>
+                    </li>
+                    <li class="next-step">
+                        <span class="next-step-icon feedback" aria-hidden="true">2</span>
+                        <span class="next-step-text">
+                            <strong>We'll investigate</strong>
+                            <span>We typically respond within 24-48 hours with an update or solution.</span>
+                        </span>
+                    </li>
+                    <li class="next-step">
+                        <span class="next-step-icon feedback" aria-hidden="true">3</span>
+                        <span class="next-step-text">
+                            <strong>We'll resolve it</strong>
+                            <span>We'll work with you to resolve the issue as quickly as possible.</span>
+                        </span>
+                    </li>
+                </ol>
+            `;
+        }
+
+        function renderFeedbackNextSteps() {
+            nextStepsHeading.innerHTML = `
+                <span class="feedback-heading-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M22 2 11 13"></path><path d="m22 2-7 20-4-9-9-4z"></path></svg>
+                </span>
+                <h2 id="nextStepsTitle">What happens next?</h2>
+            `;
+            nextStepsContent.innerHTML = `
+                <ol class="next-steps feedback">
+                    <li class="next-step">
+                        <span class="next-step-icon feedback" aria-hidden="true">1</span>
+                        <span class="next-step-text">
+                            <strong>We'll review your feedback</strong>
+                            <span>Our team will review and assess your feedback.</span>
+                        </span>
+                    </li>
+                    <li class="next-step">
+                        <span class="next-step-icon feedback" aria-hidden="true">2</span>
+                        <span class="next-step-text">
+                            <strong>We'll get in touch</strong>
+                            <span>If needed, we'll contact you for more information.</span>
+                        </span>
+                    </li>
+                    <li class="next-step">
+                        <span class="next-step-icon feedback" aria-hidden="true">3</span>
+                        <span class="next-step-text">
+                            <strong>We'll keep improving</strong>
+                            <span>Your feedback helps us improve Cascade Plus.</span>
+                        </span>
+                    </li>
+                </ol>
+            `;
+        }
+
+        document.querySelectorAll(".priority-option").forEach((button) => {
+            button.addEventListener("click", () => {
+                document.querySelectorAll(".priority-option").forEach((item) => {
+                    item.classList.remove("active");
+                    item.setAttribute("aria-checked", "false");
+                });
+                button.classList.add("active");
+                button.setAttribute("aria-checked", "true");
+            });
+        });
+
+        document.querySelectorAll(".help-mode-option").forEach((button) => {
+            button.addEventListener("click", () => {
+                document.querySelectorAll(".help-mode-option").forEach((item) => {
+                    item.classList.remove("active");
+                    item.setAttribute("aria-selected", "false");
+                });
+                button.classList.add("active");
+                button.setAttribute("aria-selected", "true");
+
+                const isFeedback = button.dataset.helpMode === "feedback";
+                const title = document.getElementById("supportRequestTitle");
+                const subtitle = document.getElementById("supportRequestSubtitle");
+                const icon = document.getElementById("supportRequestIcon");
+                const category = document.getElementById("requestCategory");
+
+                if (isFeedback) {
+                    title.textContent = "We value your feedback";
+                    subtitle.textContent = "Help us improve Cascade Plus by sharing your experience, suggestions or feedback.";
+                    subtitle.hidden = false;
+                    icon.innerHTML = '<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
+                    category.innerHTML = '<option value="">Select a category...</option><option>Dashboard</option><option>Order Pad</option><option>Order History</option><option>Reports</option><option>Other</option>';
+                } else {
+                    title.textContent = "Submit a Support Request";
+                    subtitle.textContent = "";
+                    subtitle.hidden = true;
+                    icon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path></svg>';
+                    category.innerHTML = '<option value="">Select a category...</option><option>Account Access</option><option>Ordering Issue</option><option>Pricing Issue</option><option>Supplier Issue</option><option>Report Issue</option><option>Technical Issue</option><option>Other</option>';
+                }
+            });
+        });
+
+        document.getElementById("cancelRequestButton").addEventListener("click", () => {
+            openModal(cancelConfirmModal);
+        });
+
+        document.getElementById("confirmCancelButton").addEventListener("click", () => {
+            resetSupportForm();
+            closeModal(cancelConfirmModal);
+        });
+
+        supportForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            if (getActiveHelpMode() === "feedback") {
+                addSubmittedFeedback();
+                renderFeedbackNextSteps();
+            } else {
+                renderSupportNextSteps();
+            }
+            openModal(nextStepsModal);
+            resetSupportForm();
+        });
+
+        document.querySelectorAll("[data-close-modal]").forEach((button) => {
+            button.addEventListener("click", () => {
+                closeModal(button.closest(".modal-backdrop"));
+            });
+        });
+
+        document.querySelectorAll(".modal-backdrop").forEach((modal) => {
+            modal.addEventListener("click", (event) => {
+                if (event.target === modal) {
+                    closeModal(modal);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "cart-highlights-and-warning",
+  "private": true,
+  "scripts": {
+    "build:preview": "node scripts/build-preview.mjs",
+    "test:preview": "node scripts/test-preview.mjs",
+    "test": "node --test tests"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.9",
+    "html-minifier-terser": "^7.2.0",
+    "playwright-core": "^1.55.0"
+  }
+}

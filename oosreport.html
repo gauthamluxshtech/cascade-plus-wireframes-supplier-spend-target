@@ -1,0 +1,1593 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CASCADE Order Exceptions Report</title>
+  <style>
+    :root {
+      --green: #047857;
+      --green-dark: #065f46;
+      --green-soft: #ecfdf5;
+      --ink: #17212f;
+      --muted: #667085;
+      --line: #d9e0e8;
+      --app-bg: #f6f8f7;
+      --shadow: 0 14px 34px rgba(23, 33, 47, 0.1);
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background: var(--app-bg);
+      background-attachment: fixed;
+      background-size: cover;
+  background-position: center bottom;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+    }
+
+    .topbar {
+      min-height: 64px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 22px;
+      padding: 0 24px;
+      color: #fff;
+      background: #111827;
+      box-shadow: 0 2px 8px rgba(6, 95, 70, 0.2);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .brand-logo {
+      width: auto;
+      height: 48px;
+      max-width: 124px;
+      object-fit: contain;
+    }
+
+    .main-nav {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      align-self: stretch;
+      overflow: visible;
+    }
+
+    .main-nav a,
+    .main-nav button,
+    .profile-button {
+      min-height: 44px;
+      border: 0;
+      border-radius: 8px 8px 0 0;
+      padding: 0 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      text-transform: uppercase;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .main-nav a.active,
+    .main-nav a:hover,
+    .main-nav button.active,
+    .main-nav button:hover,
+    .nav-more.active>.more-toggle,
+    .nav-more:hover>.more-toggle,
+    .nav-more:focus-within>.more-toggle {
+      color: var(--green);
+      background: #fff;
+    }
+
+    .main-nav a.active,
+    .main-nav button.active,
+    .nav-more.active {
+      position: relative;
+      margin-top: 12px;
+    }
+
+    .nav-more {
+      position: relative;
+      display: inline-flex;
+      align-items: flex-end;
+    }
+
+    .more-toggle {
+      gap: 8px;
+    }
+
+    .more-toggle::after,
+    .select-wrap::after {
+      content: "";
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 5px solid currentColor;
+    }
+
+    .more-menu {
+      position: absolute;
+      top: calc(100% - 1px);
+      left: 0;
+      z-index: 30;
+      min-width: 178px;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px;
+      border-radius: 0 0 8px 8px;
+      background: #fff;
+      box-shadow: 0 16px 34px rgba(15, 23, 42, 0.2);
+    }
+
+    .nav-more:hover .more-menu,
+    .nav-more:focus-within .more-menu {
+      display: flex;
+    }
+
+    .main-nav .more-menu a {
+      min-height: 38px;
+      border-radius: 6px;
+      margin-top: 0;
+      padding: 0 12px;
+      color: var(--ink);
+      background: transparent;
+    }
+
+    .main-nav .more-menu a:hover,
+    .main-nav .more-menu a:focus-visible {
+      color: #fff;
+      background: var(--green);
+    }
+
+    .profile-button {
+      min-height: 36px;
+      gap: 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #fff;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .profile-button::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-right: 1.5px solid currentColor;
+      border-bottom: 1.5px solid currentColor;
+      transform: translateY(-2px) rotate(45deg);
+    }
+
+    .account-menu {
+      position: relative;
+      justify-self: end;
+    }
+
+    .account-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 60;
+      width: min(232px, calc(100vw - 24px));
+      display: none;
+      flex-direction: column;
+      padding: 8px 0;
+      border-radius: 8px;
+      color: rgba(255, 255, 255, 0.9);
+      background: #0f1726;
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.28);
+    }
+
+    .account-menu.is-open .account-dropdown {
+      display: flex;
+    }
+
+    .account-dropdown::before {
+      content: "";
+      position: absolute;
+      top: -9px;
+      right: 18px;
+      width: 18px;
+      height: 18px;
+      border-radius: 3px 0 0 0;
+      background: #0f1726;
+      transform: rotate(45deg);
+    }
+
+    .account-menu-item {
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border: 0;
+      padding: 0 16px;
+      color: rgba(255, 255, 255, 0.86);
+      background: transparent;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.8px;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    .account-menu-item svg,
+    .icon {
+      display: block;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .account-menu-item svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 1.6;
+    }
+
+    .account-menu-separator {
+      height: 1px;
+      margin: 8px 0;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .workspace {
+      width: min(100%, 1760px);
+      margin: 0 auto;
+      padding: 26px 32px 44px;
+    }
+
+    .heading-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    .page-heading {
+      display: flex;
+      align-items: baseline;
+      gap: 24px;
+    }
+
+    .page-heading h1 {
+      margin: 0;
+      color: #111827;
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 1.15;
+    }
+
+    .page-heading p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .download-toggle {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 0 13px;
+      color: var(--ink);
+      background: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(23, 33, 47, 0.05);
+    }
+
+    .download-toggle .icon {
+      color: var(--green);
+    }
+
+    .filter-panel,
+    .table-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .filter-panel {
+      margin-bottom: 16px;
+      padding: 14px 12px 12px;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: minmax(170px, 0.8fr) minmax(170px, 0.8fr) minmax(240px, 1.05fr) minmax(260px, 1.2fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .field {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+    }
+
+    .field>span:first-child {
+      min-height: 30px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-right: 0;
+      border-radius: 6px 0 0 6px;
+      padding: 0 9px;
+      color: #344054;
+      background: #f8fafc;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .control {
+      min-height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 0 6px 6px 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 6px;
+      padding: 0 8px;
+      color: #344054;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .control input,
+    .control select {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      color: var(--ink);
+      background: transparent;
+      font-weight: 600;
+    }
+
+    .control input::placeholder {
+      color: #667085;
+    }
+
+    .select-wrap select {
+      appearance: none;
+      padding-left: 6px;
+    }
+
+    .date-wrap {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .date-wrap input[type="date"] {
+      min-height: 28px;
+      cursor: pointer;
+      color-scheme: light;
+    }
+
+    .date-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+      width: 18px;
+      height: 18px;
+      margin-left: 6px;
+      cursor: pointer;
+      opacity: 0.85;
+    }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2;
+    }
+
+    .filter-panel .control .icon {
+      display: none;
+    }
+
+    .filter-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .soft-button,
+    .green-button {
+      width: 34px;
+      min-width: 34px;
+      height: 30px;
+      min-height: 30px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-weight: 700;
+    }
+
+    .soft-button {
+      border: 1px solid var(--line);
+      color: var(--green-dark);
+      background: var(--green-soft);
+    }
+
+    .green-button {
+      border: 1px solid var(--green);
+      color: #fff;
+      background: linear-gradient(180deg, #06966f 0%, #047857 100%);
+      box-shadow: 0 10px 20px rgba(4, 120, 87, 0.22);
+    }
+
+    .table-panel {
+      padding: 8px 10px 10px;
+      overflow: hidden;
+    }
+
+    .table-toolbar {
+      min-height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .entries-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #061a33;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .entries-control select {
+      min-width: 66px;
+      min-height: 28px;
+      border: 2px solid #111827;
+      border-radius: 6px;
+      padding: 0 8px;
+      color: #061a33;
+      background: #fff;
+      font-weight: 600;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1180px;
+      font-size: 14px;
+    }
+
+    thead th {
+      height: 38px;
+      padding: 0 16px;
+      color: var(--green-dark);
+      background: linear-gradient(180deg, #d8f3e6 0%, #c3ead9 100%);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    tbody td {
+      height: 36px;
+      border-bottom: 1px solid #e7ecf2;
+      padding: 0 16px;
+      color: #17212f;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    tbody tr:hover {
+      background: #f8fffc;
+    }
+
+    .table-panel table th:nth-child(5),
+    .table-panel table td:nth-child(5),
+    .table-panel table th:nth-child(6),
+    .table-panel table td:nth-child(6) {
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sort {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sort::after {
+      content: "\2195";
+      color: #000;
+      font-size: 13px;
+    }
+
+    .empty-block {
+      min-height: 214px;
+      border: 1px solid #e3e8ef;
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      text-align: center;
+      background: #fff;
+    }
+
+    .empty-art {
+      position: relative;
+      width: 128px;
+      height: 96px;
+      margin: 0 auto 12px;
+    }
+
+    .empty-box {
+      position: absolute;
+      left: 24px;
+      bottom: 12px;
+      width: 76px;
+      height: 48px;
+      border-radius: 6px;
+      background: linear-gradient(180deg, #c9ece3 0%, #dff3ee 100%);
+      box-shadow: 0 16px 30px rgba(74, 139, 127, 0.16);
+    }
+
+    .empty-box::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: -28px;
+      width: 64px;
+      height: 34px;
+      border-radius: 6px 6px 3px 3px;
+      background: linear-gradient(180deg, #bfe6dc 0%, #acdcd1 100%);
+      transform: skewX(-16deg);
+    }
+
+    .empty-box::after {
+      content: "";
+      position: absolute;
+      left: 24px;
+      top: -18px;
+      width: 44px;
+      height: 26px;
+      border-radius: 0 0 5px 5px;
+      background: rgba(108, 172, 158, 0.28);
+    }
+
+    .blocked-badge {
+      position: absolute;
+      top: 0;
+      right: 8px;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #ff6673;
+      background: #fff;
+      box-shadow: 0 12px 26px rgba(17, 24, 39, 0.14);
+    }
+
+    .blocked-badge svg {
+      width: 28px;
+      height: 28px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2.4;
+    }
+
+    .empty-block h2 {
+      margin: 0 0 10px;
+      color: #1f2a44;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .empty-block p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .table-footer {
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 10px 2px 0;
+      color: #344054;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .page-button {
+      min-width: 32px;
+      min-height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: #17212f;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .page-button.active {
+      border-color: var(--green);
+      color: #fff;
+      background: var(--green);
+    }
+
+    .site-footer {
+      margin-top: 22px;
+      border-top: 1px solid rgba(217, 224, 232, 0.9);
+      padding: 22px 0 2px;
+      color: #7a879a;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media (max-width: 1200px) {
+      .filter-grid {
+        grid-template-columns: repeat(2, minmax(190px, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        grid-template-columns: 1fr;
+        padding: 12px 16px 0;
+      }
+
+      .main-nav {
+        overflow-x: auto;
+      }
+
+      .workspace {
+        padding: 22px 16px 34px;
+      }
+
+      .heading-row,
+      .page-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .filter-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-actions,
+      .table-toolbar,
+      .table-footer {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .filter-actions {
+        justify-content: flex-start;
+      }
+    }
+  
+    /* Unified report styling: aligned with Order Report */
+    .workspace {
+      width: min(100%, 1760px);
+      margin: 0 auto;
+      padding: 26px 32px 44px;
+    }
+
+    .heading-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    .page-heading {
+      display: flex;
+      align-items: baseline;
+      gap: 24px;
+    }
+
+    .page-heading h1 {
+      margin: 0;
+      color: #111827;
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 1.15;
+    }
+
+    .page-heading p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .download-toggle {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 0 13px;
+      color: var(--ink);
+      background: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(23, 33, 47, 0.05);
+    }
+
+    .download-toggle .icon,
+    .filter-panel .icon,
+    .green-button .icon,
+    .soft-button .icon {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2;
+    }
+
+    .download-toggle .icon {
+      color: var(--green);
+    }
+
+    .filter-panel,
+    .table-panel,
+    .savings-filter-bar,
+    .savings-kpi-card,
+    .savings-chart-card,
+    .savings-methodology-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .filter-panel,
+    .savings-filter-bar {
+      margin-bottom: 16px;
+      padding: 14px 12px 12px;
+    }
+
+    .filter-grid,
+    .savings-filter-bar {
+      gap: 8px;
+      align-items: center;
+    }
+
+    .field {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      gap: 0;
+    }
+
+    .field > span:first-child,
+    .field-label {
+      min-height: 30px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-right: 0;
+      border-radius: 6px 0 0 6px;
+      padding: 0 9px;
+      color: #344054;
+      background: #f8fafc;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .control {
+      min-height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 0 6px 6px 0;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 6px;
+      padding: 0 8px;
+      color: #344054;
+      background: #fff;
+      box-shadow: none;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .control input,
+    .control select {
+      width: 100%;
+      min-width: 0;
+      min-height: 28px;
+      border: 0;
+      outline: 0;
+      color: var(--ink);
+      background: transparent;
+      font-weight: 600;
+    }
+
+    .select-wrap {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .select-wrap select {
+      appearance: none;
+    }
+
+    .date-wrap {
+      grid-template-columns: minmax(0, 1fr);
+      padding-right: 6px;
+    }
+
+    .date-wrap input[type="date"] {
+      color-scheme: light;
+      cursor: pointer;
+    }
+
+    .date-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+      width: 18px;
+      height: 18px;
+      margin-left: 6px;
+      cursor: pointer;
+      opacity: 0.85;
+    }
+
+    .filter-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .soft-button,
+    .green-button,
+    .icon-button,
+    .icon-filter-button {
+      width: 34px;
+      min-width: 34px;
+      height: 30px;
+      min-height: 30px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-weight: 700;
+    }
+
+    .soft-button,
+    .icon-button,
+    .secondary-button.icon-filter-button {
+      border: 1px solid var(--line);
+      color: var(--green-dark);
+      background: var(--green-soft);
+    }
+
+    .green-button,
+    .primary-button.icon-filter-button {
+      border: 1px solid var(--green);
+      color: #fff;
+      background: linear-gradient(180deg, #06966f 0%, #047857 100%);
+      box-shadow: 0 10px 20px rgba(4, 120, 87, 0.22);
+    }
+
+    .table-panel {
+      padding: 8px 10px 10px;
+      overflow: hidden;
+    }
+
+    .table-toolbar {
+      min-height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .entries-control,
+    .entries-row label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #061a33;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .entries-control select,
+    .entries-row select {
+      min-width: 66px;
+      min-height: 28px;
+      border: 2px solid #111827;
+      border-radius: 6px;
+      padding: 0 8px;
+      color: #061a33;
+      background: #fff;
+      font-weight: 600;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    thead th,
+    .savings-details-table th {
+      height: 38px;
+      padding: 0 16px;
+      color: var(--green-dark);
+      background: linear-gradient(180deg, #d8f3e6 0%, #c3ead9 100%);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    tbody td,
+    .savings-details-table td {
+      height: 36px;
+      border-bottom: 1px solid #e7ecf2;
+      padding: 0 16px;
+      color: #17212f;
+      background: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    tbody tr:nth-child(odd) td {
+      background: #fff;
+    }
+
+    tbody tr:hover td,
+    tbody tr:hover,
+    .savings-details-table tbody tr:hover td {
+      background: #f8fffc;
+    }
+
+    .num,
+    td.num,
+    th.num,
+    .numeric {
+      text-align: right !important;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .table-footer {
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 10px 2px 0;
+      color: #344054;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 7px;
+    }
+
+    .pagination button,
+    .page-button {
+      min-width: 32px;
+      min-height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: #17212f;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .pagination button.active,
+    .page-button.active {
+      border-color: var(--green);
+      color: #fff;
+      background: var(--green);
+      box-shadow: none;
+    }
+
+    .pagination button:not(:disabled):hover,
+    .page-button:not(:disabled):hover {
+      color: #fff;
+      background: var(--green);
+    }
+
+    @media (max-width: 760px) {
+      .workspace {
+        padding: 22px 16px 34px;
+      }
+
+      .heading-row,
+      .page-heading,
+      .table-footer {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .filter-grid,
+      .savings-filter-bar {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    /* Report consistency refinements */
+    .download-toggle {
+      min-height: 38px;
+      border: 1px solid #cfd8e3;
+      border-radius: 7px;
+      color: #061a33;
+      background: #fff;
+      box-shadow: 0 6px 16px rgba(23, 33, 47, 0.06);
+    }
+
+    .download-toggle:hover,
+    .download-toggle:focus-visible {
+      border-color: #10b981;
+      color: var(--green);
+      outline: 0;
+    }
+
+    .filter-panel {
+      border-top: 4px solid var(--green);
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 8px 22px rgba(23, 33, 47, 0.08);
+    }
+
+    .field>span:first-child,
+    .field-label {
+      color: #475467;
+      background: #f8fafc;
+      font-weight: 700;
+    }
+
+    .control {
+      min-height: 32px;
+    }
+
+    .green-button {
+      width: 38px;
+      min-width: 38px;
+      height: 36px;
+      min-height: 36px;
+      border-radius: 7px;
+      background: linear-gradient(180deg, #06966f 0%, #047857 100%);
+      box-shadow: 0 10px 20px rgba(4, 120, 87, 0.18);
+    }
+
+    .soft-button,
+    .icon-button {
+      width: 38px;
+      min-width: 38px;
+      height: 36px;
+      min-height: 36px;
+      border: 1px solid #b7dfd3;
+      border-radius: 7px;
+      color: var(--green);
+      background: #fff;
+    }
+
+    .table-panel {
+      padding: 12px 10px 10px;
+      background: rgba(255, 255, 255, 0.97);
+      box-shadow: 0 8px 22px rgba(23, 33, 47, 0.08);
+    }
+
+    thead th {
+      height: 39px;
+      background: linear-gradient(180deg, #d8f3e6 0%, #bdebd8 100%);
+    }
+
+    tbody td {
+      height: 37px;
+    }
+
+    tbody tr:hover td,
+    tbody tr:hover {
+      background: #f6fffb;
+    }
+
+    .pagination button,
+    .page-button {
+      border-color: #d9e0e8;
+      background: #fff;
+    }
+    </style>
+  <link rel="stylesheet" href="navigation.css" />
+</head>
+
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="CASCADE home">
+        <img class="brand-logo" src="logo.png" alt="CASCADE Plus" />
+      </a>
+      <nav class="main-nav" aria-label="Primary">
+        <a href="Dashboard.html">Dashboard</a>
+        <a href="index.html">Order Pad</a>
+        <a href="history.html">Order History</a>
+        <a class="active" href="report.html" aria-current="page">Reports</a>
+        <a href="help.html">Help</a>
+        <div class="nav-more">
+          <button class="more-toggle" type="button" aria-haspopup="true" aria-expanded="false">More</button>
+          <div class="more-menu" role="menu">
+            <a href="pending.html" role="menuitem">Pending Order</a>
+            <a href="outofstock.html" role="menuitem">Out Of Stock</a>
+            <a href="settings.html" role="menuitem">Settings</a>
+          </div>
+        </div>
+      </nav>
+      <div class="account-menu">
+        <button class="profile-button" type="button" aria-haspopup="true" aria-expanded="false">HI, DUMMY1</button>
+        <div class="account-dropdown" role="menu">
+          <button class="account-menu-item" type="button" role="menuitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 11.5 12 4l9 7.5"></path>
+              <path d="M5.5 10.5V20h13v-9.5"></path>
+              <path d="M9.5 17h5"></path>
+              <path d="M9 14h2"></path>
+              <path d="M13 14h2"></path>
+            </svg>
+            Reset Password
+          </button>
+          <span class="account-menu-separator" aria-hidden="true"></span>
+          <button class="account-menu-item" type="button" role="menuitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="7.5" cy="16.5" r="3"></circle>
+              <path d="m10 14 7.5-7.5"></path>
+              <path d="m15.5 8.5 2 2"></path>
+              <path d="m18 6 2 2"></path>
+            </svg>
+            Log Out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <div class="heading-row">
+        <section class="page-heading" aria-labelledby="reportTitle">
+          <h1 id="reportTitle">Order Exceptions Report</h1>
+          <p>Review supplier responses for items that could not be fulfilled and take action.</p>
+        </section>
+        <button class="download-toggle" id="downloadCsv" type="button" aria-label="Download CSV">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3v12"></path>
+            <path d="m8 11 4 4 4-4"></path>
+            <path d="M5 21h14"></path>
+          </svg>
+          Download
+        </button>
+      </div>
+
+      <section class="filter-panel" aria-label="Out of stock filters">
+        <div class="filter-grid">
+          <label class="field">
+            <span>From</span>
+            <span class="control date-wrap">
+              <input id="fromDate" type="date" value="2026-07-01" aria-label="From date" lang="en-GB" />
+            </span>
+          </label>
+
+          <label class="field">
+            <span>To</span>
+            <span class="control date-wrap">
+              <input id="toDate" type="date" value="2026-10-15" aria-label="To date" lang="en-GB" />
+            </span>
+          </label>
+
+          <label class="field">
+            <span>Product</span>
+            <span class="control">
+              <input id="productFilter" type="search" placeholder="Search product..." aria-label="Product" />
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="m16.5 16.5 4 4"></path>
+              </svg>
+            </span>
+          </label>
+
+          <label class="field">
+            <span>Reason Type</span>
+            <span class="control select-wrap">
+              <select id="reasonTypeFilter" aria-label="Reason Type">
+                <option value="all">All</option>
+                <option value="blocked">Blocked By System</option>
+                <option value="manufacturer">Manufacturer Cannot Supply</option>
+              </select>
+            </span>
+          </label>
+
+          <div class="filter-actions">
+            <button class="green-button" id="searchFilters" type="button" aria-label="Search report" title="Search">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="m16.5 16.5 4 4"></path>
+              </svg>
+            </button>
+            <button class="soft-button" id="resetFilters" type="button" aria-label="Reset filters" title="Reset filters">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 12a9 9 0 1 0 3-6.7"></path>
+                <path d="M3 4v5h5"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="table-panel" aria-label="Out of stock report table">
+        <div class="table-toolbar">
+          <label class="entries-control">
+            Show
+            <select id="entriesPerPage" aria-label="Entries per page">
+              <option>10</option>
+              <option>25</option>
+              <option>50</option>
+              <option>100</option>
+            </select>
+            entries
+          </label>
+        </div>
+
+        <div class="table-wrap" id="tableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th><span class="sort">Order ID</span></th>
+                <th><span class="sort">Date</span></th>
+                <th><span class="sort">Product</span></th>
+                <th><span class="sort">Supplier Name</span></th>
+                <th><span class="sort">Rec. Qty</span></th>
+                <th><span class="sort">Req. Qty</span></th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody id="outOfStockRows"></tbody>
+          </table>
+        </div>
+
+        <div class="empty-block" id="emptyState" hidden>
+          <div>
+            <div class="empty-art" aria-hidden="true">
+              <span class="empty-box"></span>
+              <span class="blocked-badge">
+                <svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="8"></circle>
+                  <path d="M7.5 7.5 16.5 16.5"></path>
+                </svg>
+              </span>
+            </div>
+            <h2>No out of stock lines found</h2>
+            <p>Try adjusting your filters or search criteria.</p>
+          </div>
+        </div>
+
+        <div class="table-footer">
+          <span id="entriesSummary">Showing 0 to 0 of 0 entries</span>
+          <nav class="pagination" id="pagination" aria-label="Pagination"></nav>
+        </div>
+      </section>
+      <footer class="site-footer">&copy; 2019-2026 Cascade Plus. All rights reserved. Powered by LuxshTech.</footer>
+    </main>
+  </div>
+
+  <script src="account-menu.js"></script>
+  <script>
+    const outOfStockLines = [
+      { orderId: "336995", date: "2026-07-16T09:34:01", product: "Rabeprazole 10mg tabs (28)", supplierName: "AAH", recQty: 0, reqQty: 8, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "336995", date: "2026-07-16T09:34:01", product: "Rabeprazole 10mg tabs (28)", supplierName: "B&S Distribution", recQty: 0, reqQty: 8, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "336995", date: "2026-07-16T09:34:01", product: "Rabeprazole 10mg tabs (28)", supplierName: "Alliance", recQty: 0, reqQty: 8, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "336995", date: "2026-07-16T09:34:01", product: "Rabeprazole 10mg tabs (28)", supplierName: "OTC Direct", recQty: 0, reqQty: 8, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "336995", date: "2026-07-16T09:34:01", product: "Rabeprazole 10mg tabs (28)", supplierName: "Phoenix", recQty: 0, reqQty: 8, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "336995", date: "2026-07-16T09:34:01", product: "Rabeprazole 10mg tabs (28)", supplierName: "Ethigen", recQty: 0, reqQty: 8, category: "Generic", supplierComment: "Manufacturer Cannot Supply" },
+      { orderId: "336591", date: "2026-07-15T09:42:11", product: "Senokot 7.5mg/5ml syrup SF (150ml)", supplierName: "B&S Distribution", recQty: 0, reqQty: 3, category: "Generic", supplierComment: "Out Of Stock" },
+      { orderId: "336480", date: "2026-07-14T17:32:25", product: "Colgate Duraphat 5000ppm Fluoride Toothpaste (51g)", supplierName: "Phoenix", recQty: 0, reqQty: 6, category: "Generic", supplierComment: "Blocked no price." },
+      { orderId: "336480", date: "2026-07-14T17:32:25", product: "Co-codamol 15mg/500mg caplets (100)", supplierName: "Phoenix", recQty: 0, reqQty: 20, category: "Generic", supplierComment: "Blocked no price." },
+      { orderId: "336480", date: "2026-07-14T17:32:25", product: "Candesartan 8mg tabs (28)", supplierName: "Phoenix", recQty: 0, reqQty: 8, category: "Generic", supplierComment: "Quantity to deliver : 0 Status : MCS - Manufacturer Unable To Supply" },
+      { orderId: "336480", date: "2026-07-14T17:32:25", product: "Candesartan 8mg tabs (28)", supplierName: "AAH", recQty: 0, reqQty: 8, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "336480", date: "2026-07-14T17:32:25", product: "Candesartan 8mg tabs (28)", supplierName: "B&S Distribution", recQty: 0, reqQty: 8, category: "Generic", supplierComment: "Out Of Stock" },
+      { orderId: "336480", date: "2026-07-14T17:32:25", product: "Candesartan 8mg tabs (28)", supplierName: "Alliance", recQty: 0, reqQty: 8, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "336480", date: "2026-07-14T17:32:25", product: "Candesartan 8mg tabs (28)", supplierName: "OTC Direct", recQty: 0, reqQty: 8, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "336480", date: "2026-07-14T17:32:25", product: "Clobetasol 0.05% oint (30g)", supplierName: "Phoenix", recQty: 0, reqQty: 6, category: "Generic", supplierComment: "Quantity to deliver : 0 Status : MCS - Manufacturer Unable To Supply" },
+      { orderId: "336439", date: "2026-07-14T16:36:15", product: "Nystan 100,000iu/1ml oral susp (30ml)", supplierName: "Alliance", recQty: 0, reqQty: 6, category: "Generic", supplierComment: "Unavailable" },
+      { orderId: "336275", date: "2026-07-14T11:54:50", product: "Ramipril 5mg caps (28)", supplierName: "Alliance", recQty: 0, reqQty: 20, category: "Generic", supplierComment: "Manufacturer cannot supply" },
+      { orderId: "336275", date: "2026-07-14T11:54:50", product: "Ramipril 5mg caps (28)", supplierName: "AAH", recQty: 0, reqQty: 20, category: "Generic", supplierComment: "SDF" },
+      { orderId: "336275", date: "2026-07-14T11:54:50", product: "Ramipril 5mg caps (28)", supplierName: "Phoenix", recQty: 0, reqQty: 20, category: "Generic", supplierComment: "Quantity to deliver : 0 Status : MCS - Manufacturer Unable To Supply" },
+      { orderId: "336275", date: "2026-07-14T11:54:50", product: "Ramipril 5mg caps (28)", supplierName: "B&S Distribution", recQty: 0, reqQty: 20, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "336275", date: "2026-07-14T11:54:50", product: "Atorvastatin 40mg tabs (28)", supplierName: "OTC Direct", recQty: 0, reqQty: 30, category: "Generic", supplierComment: "Blocked no price." },
+      { orderId: "336275", date: "2026-07-14T11:54:50", product: "Ramipril 5mg caps (28)", supplierName: "OTC Direct", recQty: 0, reqQty: 20, category: "Generic", supplierComment: "Please Re-Order" },
+      { orderId: "336275", date: "2026-07-14T11:54:50", product: "Ramipril 5mg caps (28)", supplierName: "Ethigen", recQty: 0, reqQty: 20, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "336264", date: "2026-07-14T11:46:19", product: "Propranolol 80mg tabs (28)", supplierName: "OTC Direct", recQty: 0, reqQty: 12, category: "Generic", supplierComment: "Blocked no price." },
+      { orderId: "336264", date: "2026-07-14T11:46:19", product: "Aluminium chloride 20% soln (60ml)", supplierName: "OTC Direct", recQty: 0, reqQty: 2, category: "Generic", supplierComment: "Blocked no price." },
+      { orderId: "336264", date: "2026-07-14T11:46:19", product: "Cyanocobalamin 1mg tabs (50)", supplierName: "OTC Direct", recQty: 0, reqQty: 10, category: "Generic", supplierComment: "Blocked no price." },
+      { orderId: "336195", date: "2026-07-14T09:51:21", product: "Ramipril 2.5mg caps (28)", supplierName: "Alliance", recQty: 0, reqQty: 20, category: "Generic", supplierComment: "Manufacturer cannot supply" },
+      { orderId: "336195", date: "2026-07-14T09:51:21", product: "Ramipril 2.5mg caps (28)", supplierName: "Ethigen", recQty: 0, reqQty: 20, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "336195", date: "2026-07-14T09:51:21", product: "Chemydur 60 XL 60mg tabs (28)", supplierName: "Alliance", recQty: 0, reqQty: 6, category: "Generic", supplierComment: "Manufacturer cannot supply" },
+      { orderId: "336195", date: "2026-07-14T09:51:21", product: "Chemydur 60 XL 60mg tabs (28)", supplierName: "B&S Distribution", recQty: 0, reqQty: 6, category: "Generic", supplierComment: "Out Of Stock" },
+      { orderId: "336195", date: "2026-07-14T09:51:21", product: "Adcal-D3 750mg/200iu caplets (112)", supplierName: "B&S Distribution", recQty: 0, reqQty: 10, category: "Generic", supplierComment: "Out Of Stock" },
+      { orderId: "336195", date: "2026-07-14T09:51:21", product: "Adcal-D3 750mg/200iu caplets (112)", supplierName: "Ethigen", recQty: 0, reqQty: 10, category: "Generic", supplierComment: "Manufacturer Cannot Supply" },
+      { orderId: "336195", date: "2026-07-14T09:51:21", product: "Adcal-D3 750mg/200iu caplets (112)", supplierName: "Phoenix", recQty: 0, reqQty: 10, category: "Generic", supplierComment: "Quantity to deliver : 0 Status : MCS - Manufacturer Unable To Supply" },
+      { orderId: "336195", date: "2026-07-14T09:51:21", product: "Adcal-D3 750mg/200iu caplets (112)", supplierName: "AAH", recQty: 0, reqQty: 10, category: "Generic", supplierComment: "SDF" },
+      { orderId: "336195", date: "2026-07-14T09:51:21", product: "Adcal-D3 750mg/200iu caplets (112)", supplierName: "Alliance", recQty: 0, reqQty: 10, category: "Generic", supplierComment: "Manufacturer cannot supply" },
+      { orderId: "336195", date: "2026-07-14T09:51:21", product: "Ramipril 2.5mg caps (28)", supplierName: "OTC Direct", recQty: 0, reqQty: 20, category: "Generic", supplierComment: "Please Re-Order" },
+      { orderId: "336195", date: "2026-07-14T09:51:21", product: "Ramipril 2.5mg caps (28)", supplierName: "B&S Distribution", recQty: 0, reqQty: 20, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "336195", date: "2026-07-14T09:51:21", product: "Ramipril 2.5mg caps (28)", supplierName: "AAH", recQty: 0, reqQty: 20, category: "Generic", supplierComment: "SDF" },
+      { orderId: "336195", date: "2026-07-14T09:51:21", product: "Ramipril 2.5mg caps (28)", supplierName: "Phoenix", recQty: 0, reqQty: 20, category: "Generic", supplierComment: "Quantity to deliver : 0 Status : MCS - Manufacturer Unable To Supply" },
+      { orderId: "335946", date: "2026-07-13T13:11:01", product: "Sharpsguard disposal unit yellow 5 Litre", supplierName: "OTC Direct", recQty: 0, reqQty: 1, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "335946", date: "2026-07-13T13:11:01", product: "Sharpsguard disposal unit yellow 5 Litre", supplierName: "Alliance", recQty: 0, reqQty: 1, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "335587", date: "2026-07-10T17:43:42", product: "Co-codamol 30mg/500mg caplets (100)", supplierName: "OTC Direct", recQty: 0, reqQty: 10, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "335587", date: "2026-07-10T17:43:42", product: "Co-codamol 30mg/500mg caplets (100)", supplierName: "B&S Distribution", recQty: 0, reqQty: 10, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "335587", date: "2026-07-10T17:43:42", product: "Co-codamol 30mg/500mg caplets (100)", supplierName: "Phoenix", recQty: 0, reqQty: 10, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "335587", date: "2026-07-10T17:43:42", product: "Ramipril 10mg tabs (28)", supplierName: "Alliance", recQty: 0, reqQty: 6, category: "Generic", supplierComment: "Unavailable" },
+      { orderId: "335587", date: "2026-07-10T17:43:42", product: "Ramipril 10mg tabs (28)", supplierName: "OTC Direct", recQty: 0, reqQty: 6, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "335587", date: "2026-07-10T17:43:42", product: "Ramipril 10mg tabs (28)", supplierName: "AAH", recQty: 0, reqQty: 6, category: "Generic", supplierComment: "SDF" },
+      { orderId: "335587", date: "2026-07-10T17:43:42", product: "Ramipril 10mg tabs (28)", supplierName: "B&S Distribution", recQty: 0, reqQty: 6, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "335587", date: "2026-07-10T17:43:42", product: "Co-codamol 30mg/500mg caplets (100)", supplierName: "Ethigen", recQty: 0, reqQty: 10, category: "Generic", supplierComment: "Blocked as price above drug tariff. Call supplier." },
+      { orderId: "335587", date: "2026-07-10T17:43:42", product: "Ramipril 10mg tabs (28)", supplierName: "Ethigen", recQty: 0, reqQty: 6, category: "Generic", supplierComment: "Manufacturer Cannot Supply" }
+    ];
+
+    // Orders placed from the Order Pad (newest first): each supplier outcome that received nothing, e.g. a
+    // supplier skipped by the cascade because it is locked in Settings.
+    const submittedOrderLines = (() => {
+      try {
+        const stored = JSON.parse(window.localStorage.getItem("cascade-submitted-orders-v1") || "[]");
+        // Numeric order IDs only: orders saved before them (e.g. "OPMVQIWT8V") are not shown.
+        return (Array.isArray(stored) ? stored : [])
+          .filter((order) => /^\d+$/.test(String(order?.id)))
+          .flatMap((order) => (order?.products || []).flatMap((product) =>
+          (Array.isArray(product?.outcomes) ? product.outcomes : [])
+            .filter((outcome) => Number(outcome?.receivedQty || 0) === 0)
+            .map((outcome) => ({
+              orderId: String(order.id || ""),
+              date: order.dateIso,
+              product: String(product.finalProductName || product.description || ""),
+              supplierName: String(outcome.supplier || ""),
+              recQty: 0,
+              reqQty: Number(outcome.requestedQty ?? product.requestedQty ?? 0),
+              category: String(product.category || ""),
+              supplierComment: String(outcome.comment || outcome.status || "")
+            }))));
+      } catch (error) {
+        return [];
+      }
+    })();
+    outOfStockLines.unshift(...submittedOrderLines);
+
+    const state = {
+      filteredRows: [...outOfStockLines],
+      page: 1,
+      perPage: 10
+    };
+
+    const els = {
+      fromDate: document.querySelector("#fromDate"),
+      toDate: document.querySelector("#toDate"),
+      product: document.querySelector("#productFilter"),
+      reasonType: document.querySelector("#reasonTypeFilter"),
+      rows: document.querySelector("#outOfStockRows"),
+      entries: document.querySelector("#entriesPerPage"),
+      tableWrap: document.querySelector("#tableWrap"),
+      emptyState: document.querySelector("#emptyState"),
+      summary: document.querySelector("#entriesSummary"),
+      pagination: document.querySelector("#pagination")
+    };
+
+    function openDatePicker(input) {
+      if (typeof input.showPicker !== "function") return;
+      try {
+        input.showPicker();
+      } catch (error) {
+        input.focus();
+      }
+    }
+
+    function formatDate(value) {
+      return new Intl.DateTimeFormat("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).format(new Date(value));
+    }
+
+    // Reason Type groups: "Blocked By System" is exactly these system reasons;
+    // "Manufacturer Cannot Supply" is every other reason (not a literal text match).
+    const blockedBySystemReasons = [
+      "blocked as price above drug tariff. call supplier",
+      "blocked no price",
+      "blocked as supplier locked. check in settings"
+    ];
+
+    function isBlockedBySystem(reason) {
+      const normalised = String(reason || "").trim().toLowerCase().replace(/\.+$/, "");
+      return blockedBySystemReasons.includes(normalised);
+    }
+
+    function matchesReasonType(line, reasonType) {
+      if (reasonType === "blocked") return isBlockedBySystem(line.supplierComment);
+      if (reasonType === "manufacturer") return !isBlockedBySystem(line.supplierComment);
+      return true;
+    }
+
+    function applyFilters() {
+      const from = els.fromDate.value ? new Date(`${els.fromDate.value}T00:00:00`) : null;
+      const to = els.toDate.value ? new Date(`${els.toDate.value}T23:59:59`) : null;
+      const product = els.product.value.trim().toLowerCase();
+      const reasonType = els.reasonType.value;
+
+      state.filteredRows = outOfStockLines.filter((line) => {
+        const date = new Date(line.date);
+        const matchesFrom = !from || date >= from;
+        const matchesTo = !to || date <= to;
+        const matchesProduct = !product || line.product.toLowerCase().includes(product);
+        return matchesFrom && matchesTo && matchesProduct && matchesReasonType(line, reasonType);
+      });
+
+      state.page = 1;
+      renderTable();
+    }
+
+    function resetFilters() {
+      els.fromDate.value = "2026-07-01";
+      // To the wireframe "today", so orders placed from the Order Pad are included.
+      els.toDate.value = "2026-10-15";
+      els.product.value = "";
+      els.reasonType.value = "all";
+      applyFilters();
+    }
+
+    function renderTable() {
+      const total = state.filteredRows.length;
+      const pages = Math.max(1, Math.ceil(total / state.perPage));
+      state.page = Math.min(state.page, pages);
+
+      const startIndex = (state.page - 1) * state.perPage;
+      const visibleRows = state.filteredRows.slice(startIndex, startIndex + state.perPage);
+      const start = total ? startIndex + 1 : 0;
+      const end = total ? startIndex + visibleRows.length : 0;
+
+      els.rows.innerHTML = visibleRows.map((line) => `
+        <tr>
+          <td>${line.orderId}</td>
+          <td>${formatDate(line.date)}</td>
+          <td>${line.product}</td>
+          <td>${line.supplierName}</td>
+          <td>${line.recQty}</td>
+          <td>${line.reqQty}</td>
+          <td>${line.supplierComment}</td>
+        </tr>
+      `).join("");
+
+      els.tableWrap.hidden = total === 0;
+      els.emptyState.hidden = total > 0;
+      els.summary.textContent = `Showing ${start} to ${end} of ${total.toLocaleString("en-GB")} entries`;
+      renderPagination(pages);
+    }
+
+    function renderPagination(pages) {
+      const buttons = [
+        `<button class="page-button" type="button" data-page="${state.page - 1}" aria-label="Previous" ${state.page === 1 ? "disabled" : ""}>&lsaquo;</button>`
+      ];
+
+      for (let page = 1; page <= pages; page += 1) {
+        buttons.push(`<button class="page-button ${page === state.page ? "active" : ""}" type="button" data-page="${page}" ${page === state.page ? 'aria-current="page"' : ""}>${page}</button>`);
+      }
+
+      buttons.push(`<button class="page-button" type="button" data-page="${state.page + 1}" aria-label="Next" ${state.page === pages ? "disabled" : ""}>&rsaquo;</button>`);
+      els.pagination.innerHTML = buttons.join("");
+    }
+
+    function downloadCsv() {
+      const headers = ["Order ID", "Date", "Product", "Supplier Name", "Rec. Qty", "Req. Qty", "Reason"];
+      const rows = state.filteredRows.map((line) => [
+        line.orderId,
+        formatDate(line.date),
+        line.product,
+        line.supplierName,
+        line.recQty,
+        line.reqQty,
+        line.supplierComment
+      ]);
+      const csvRows = [headers, ...rows].map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(","));
+      const url = URL.createObjectURL(new Blob([csvRows.join("\r\n")], { type: "text/csv;charset=utf-8" }));
+      const link = Object.assign(document.createElement("a"), { href: url, download: "out-of-stock-report.csv" });
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.querySelectorAll('input[type="date"]').forEach((input) => {
+      input.addEventListener("focus", () => openDatePicker(input));
+      input.addEventListener("click", () => openDatePicker(input));
+    });
+
+    document.querySelector("#searchFilters").addEventListener("click", applyFilters);
+    document.querySelector("#resetFilters").addEventListener("click", resetFilters);
+    document.querySelector("#downloadCsv").addEventListener("click", downloadCsv);
+    els.entries.addEventListener("change", () => {
+      state.perPage = Number(els.entries.value);
+      state.page = 1;
+      renderTable();
+    });
+    els.pagination.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-page]");
+      if (!button || button.disabled) return;
+      state.page = Number(button.dataset.page);
+      renderTable();
+    });
+
+    applyFilters();
+  </script>
+</body>
+
+</html>

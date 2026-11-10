@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CASCADE Reports</title>
+    <style>
+        :root {
+            --green: #047857;
+            --green-dark: #065f46;
+            --green-soft: #ecfdf5;
+            --ink: #17212f;
+            --muted: #667085;
+            --line: #d9e0e8;
+            --soft: #f6f8fa;
+            --app-bg: #f6f8f7;
+            --panel: #ffffff;
+            --red: #e5485d;
+            --amber: #f8b133;
+            --blue: #0688c7;
+            --teal: #06b5bd;
+            --shadow: 0 14px 34px rgba(23, 33, 47, 0.12);
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        body {
+            margin: 0;
+            min-width: 320px;
+            color: var(--ink);
+            background: var(--app-bg);
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center bottom;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+        }
+
+        .topbar {
+            min-height: 64px;
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 22px;
+            padding: 0 24px;
+            color: #fff;
+            background: #111827;
+            box-shadow: 0 2px 8px rgba(6, 95, 70, 0.2);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .brand-logo {
+            width: auto;
+            height: 48px;
+            max-width: 124px;
+            object-fit: contain;
+        }
+
+        .main-nav {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            align-self: stretch;
+            overflow: visible;
+        }
+
+        .main-nav a,
+        .main-nav button,
+        .profile-button {
+            min-height: 44px;
+            border: 0;
+            border-radius: 8px 8px 0 0;
+            padding: 0 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            background: transparent;
+            font-size: 13px;
+            font-weight: 800;
+            text-decoration: none;
+            text-transform: uppercase;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .main-nav a.active,
+        .main-nav a:hover,
+        .main-nav button.active,
+        .main-nav button:hover,
+        .nav-more.active>.more-toggle,
+        .nav-more:hover>.more-toggle,
+        .nav-more:focus-within>.more-toggle {
+            color: var(--green);
+            background: #fff;
+        }
+
+        .main-nav a.active,
+        .main-nav button.active,
+        .nav-more.active {
+            position: relative;
+            margin-top: 12px;
+        }
+
+        .nav-more {
+            position: relative;
+            display: inline-flex;
+            align-items: flex-end;
+        }
+
+        .more-toggle {
+            gap: 8px;
+        }
+
+        .more-toggle::after {
+            content: "";
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 5px solid currentColor;
+        }
+
+        .more-menu {
+            position: absolute;
+            top: calc(100% - 1px);
+            left: 0;
+            z-index: 30;
+            min-width: 178px;
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            padding: 8px;
+            border-radius: 0 0 8px 8px;
+            background: #fff;
+            box-shadow: 0 16px 34px rgba(15, 23, 42, 0.2);
+        }
+
+        .nav-more:hover .more-menu,
+        .nav-more:focus-within .more-menu {
+            display: flex;
+        }
+
+        .main-nav .more-menu a {
+            min-height: 38px;
+            border-radius: 6px;
+            margin-top: 0;
+            padding: 0 12px;
+            color: var(--ink);
+            background: transparent;
+        }
+
+        .main-nav .more-menu a:hover,
+        .main-nav .more-menu a:focus-visible {
+            color: #fff;
+            background: var(--green);
+        }
+
+        .profile-button {
+            min-height: 36px;
+            gap: 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            color: #fff;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .profile-button::after {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-right: 1.5px solid currentColor;
+            border-bottom: 1.5px solid currentColor;
+            transform: translateY(-2px) rotate(45deg);
+        }
+
+        .account-menu {
+            position: relative;
+            justify-self: end;
+        }
+
+        .account-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            z-index: 60;
+            width: min(232px, calc(100vw - 24px));
+            display: none;
+            flex-direction: column;
+            padding: 8px 0;
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            background: #0f1726;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.28);
+        }
+
+        .account-menu.is-open .account-dropdown {
+            display: flex;
+        }
+
+        .account-dropdown::before {
+            content: "";
+            position: absolute;
+            top: -9px;
+            right: 18px;
+            width: 18px;
+            height: 18px;
+            background: #0f1726;
+            border-radius: 3px 0 0 0;
+            transform: rotate(45deg);
+        }
+
+        .account-menu-item {
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border: 0;
+            padding: 0 16px;
+            color: rgba(255, 255, 255, 0.86);
+            background: transparent;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.8px;
+            text-align: left;
+            text-transform: uppercase;
+        }
+
+        .account-menu-item:hover,
+        .account-menu-item:focus-visible {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.06);
+            outline: 0;
+        }
+
+        .account-menu-item svg {
+            width: 22px;
+            height: 22px;
+            flex: 0 0 auto;
+            stroke: currentColor;
+            stroke-width: 1.6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+
+        .account-menu-separator {
+            height: 1px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .workspace {
+            width: min(100%, 1580px);
+            margin: 0 auto;
+            padding: 28px 24px 28px;
+        }
+
+        .site-footer {
+            margin-top: 18px;
+            border-top: 1px solid rgba(217, 224, 232, 0.9);
+            padding: 16px 0 0;
+            color: #7a879a;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .insights-card {
+            min-height: 150px;
+            margin-bottom: 24px;
+            border-radius: 8px;
+            padding: 18px 28px;
+            display: block;
+            overflow: hidden;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .insights-copy .eyebrow {
+            margin: 0 0 4px;
+            color: #0f172a;
+            font-size: 30px;
+            font-weight: 700;
+            line-height: 1.45;
+            text-transform: none;
+        }
+
+        .insights-copy h2 {
+            max-width: 560px;
+            margin: 0 0 10px;
+            color: #111827;
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.45;
+            letter-spacing: 0;
+        }
+
+        .insights-copy p {
+            max-width: 750px;
+            margin: 0;
+            color: #4f5257;
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.45;
+        }
+
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .reports-grid.list-view {
+            grid-template-columns: 1fr;
+        }
+
+        .report-card {
+            position: relative;
+            min-height: 142px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 22px 54px 18px 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 18px;
+            overflow: hidden;
+            color: inherit;
+            background: linear-gradient(145deg, var(--tint, #f3fffb), #fff 66%);
+            box-shadow: 0 10px 24px rgba(23, 33, 47, 0.08);
+            text-align: left;
+            transition:
+                transform 180ms ease,
+                box-shadow 180ms ease,
+                border-color 180ms ease,
+                background-color 180ms ease;
+        }
+
+        .report-card::after {
+            content: "";
+            position: absolute;
+            right: 26px;
+            bottom: -6px;
+            width: 14px;
+            height: 52px;
+            opacity: .1;
+            background: var(--accent);
+            border-radius: 8px 8px 0 0;
+            box-shadow: -24px 13px 0 0 var(--accent),
+                -48px 25px 0 0 var(--accent),
+                -72px 39px 0 0 var(--accent);
+        }
+
+        .report-card:hover,
+        .report-card:focus-visible {
+            border-color: #10b981;
+            box-shadow: 0 14px 34px rgba(4, 120, 87, 0.12);
+            outline: 0;
+            transform: translateY(-3px);
+        }
+
+        .report-card:focus-visible {
+            border-color: #047857;
+            box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.14), 0 14px 34px rgba(4, 120, 87, 0.12);
+        }
+
+        .report-card.theme-blue {
+            --accent: #3f7edb;
+            --tint: #eef5ff;
+        }
+
+        .report-card.theme-indigo {
+            --accent: #6366f1;
+            --tint: #eef2ff;
+        }
+
+        .report-card.theme-teal {
+            --accent: #0cb2a6;
+            --tint: #ecfffb;
+        }
+
+        .report-card.theme-red {
+            --accent: #e36b73;
+            --tint: #fff1f4;
+        }
+
+        .report-card.theme-amber {
+            --accent: #f0ad4e;
+            --tint: #fff7e8;
+        }
+
+        .report-card.theme-violet {
+            --accent: #8b5cd6;
+            --tint: #f5f0ff;
+        }
+
+        .report-card.theme-green {
+            --accent: #059669;
+            --tint: #ecfdf3;
+        }
+
+        .report-content {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .report-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 9px;
+        }
+
+        .report-title {
+            display: block;
+            margin: 0;
+            color: #17212f;
+            font-size: 25px;
+            font-weight: 700;
+            line-height: 1.15;
+        }
+
+        .beta-chip {
+            min-height: 22px;
+            border-radius: 999px;
+            padding: 0 9px;
+            display: inline-flex;
+            align-items: center;
+            color: #fff;
+            background: linear-gradient(180deg, #a855f7 0%, #7e22ce 100%);
+            box-shadow: 0 8px 16px rgba(126, 34, 206, 0.18);
+            font-size: 11px;
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        .report-content p {
+            max-width: 280px;
+            margin: 0;
+            color: var(--accent);
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.45;
+        }
+
+        .report-card-arrow {
+            position: absolute;
+            right: 22px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1;
+            opacity: 0.85;
+            transition: transform 180ms ease, color 180ms ease, opacity 180ms ease;
+            z-index: 2;
+        }
+
+        .report-card:hover .report-card-arrow,
+        .report-card:focus-visible .report-card-arrow {
+            transform: translate(4px, -50%);
+            color: #047857;
+            opacity: 1;
+        }
+
+        .report-card-note {
+            min-height: 0;
+            border-radius: 8px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            color: #344054;
+            background: transparent;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            min-height: 150px;
+            border: 1px dashed var(--line);
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            padding: 30px;
+            color: var(--muted);
+            background: #fff;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .toast-region {
+            position: fixed;
+            right: 22px;
+            bottom: 22px;
+            z-index: 100;
+            display: grid;
+            gap: 10px;
+        }
+
+        .toast {
+            max-width: 320px;
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: #fff;
+            background: #111827;
+            box-shadow: 0 14px 34px rgba(17, 24, 39, 0.24);
+            font-size: 13px;
+            font-weight: 800;
+            transition: opacity 180ms ease, transform 180ms ease;
+        }
+
+        @media (max-width: 1200px) {
+            .insights-card {
+                padding: 18px 24px;
+            }
+
+            .reports-grid {
+                grid-template-columns: repeat(2, minmax(220px, 1fr));
+            }
+
+        }
+
+        @media (max-width: 900px) {
+            .topbar {
+                grid-template-columns: 1fr;
+                padding: 12px 16px 0;
+            }
+
+            .main-nav {
+                overflow-x: auto;
+            }
+
+            .insights-card {
+                padding: 28px;
+            }
+
+            .insights-copy h2 {
+                max-width: 100%;
+                font-size: 14px;
+            }
+
+        }
+
+        @media (max-width: 640px) {
+            .workspace {
+                padding: 22px 16px 34px;
+            }
+
+            .insights-card {
+                padding: 22px;
+            }
+
+            .insights-copy h2 {
+                font-size: 13px;
+            }
+
+            .insights-copy p {
+                font-size: 14px;
+            }
+
+            .reports-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .report-card {
+                gap: 18px;
+                padding: 18px 48px 18px 18px;
+                min-height: 136px;
+            }
+
+            .report-title {
+                font-size: 17px;
+            }
+
+            .report-content p {
+                max-width: none;
+                font-size: 14px;
+            }
+
+            .beta-chip {
+                min-height: 22px;
+                padding: 0 9px;
+                font-size: 11px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="navigation.css" />
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <a class="brand" href="index.html" aria-label="CASCADE home">
+                <img class="brand-logo" src="logo.png" alt="CASCADE Plus" />
+            </a>
+            <nav class="main-nav" aria-label="Primary">
+                <a href="Dashboard.html">Dashboard</a>
+                <a href="index.html">Order Pad</a>
+                <a href="history.html">Order History</a>
+                <a class="active" href="report.html" aria-current="page">Reports</a>
+                <a href="help.html">Help</a>
+                <div class="nav-more">
+                    <button class="more-toggle" type="button" aria-haspopup="true" aria-expanded="false">More</button>
+                    <div class="more-menu" role="menu">
+                        <a href="pending.html" role="menuitem">Pending Order</a>
+                        <a href="outofstock.html" role="menuitem">Out Of Stock</a>
+                        <a href="settings.html" role="menuitem">Settings</a>
+                    </div>
+                </div>
+            </nav>
+            <div class="account-menu">
+                <button class="profile-button" type="button" aria-haspopup="true" aria-expanded="false">HI,
+                    DUMMY1</button>
+                <div class="account-dropdown" role="menu">
+                    <button class="account-menu-item" type="button" role="menuitem">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M3 11.5 12 4l9 7.5"></path>
+                            <path d="M5.5 10.5V20h13v-9.5"></path>
+                            <path d="M9.5 17h5"></path>
+                            <path d="M9 14h2"></path>
+                            <path d="M13 14h2"></path>
+                        </svg>
+                        Reset Password
+                    </button>
+                    <span class="account-menu-separator" aria-hidden="true"></span>
+                    <button class="account-menu-item" type="button" role="menuitem">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="7.5" cy="16.5" r="3"></circle>
+                            <path d="m10 14 7.5-7.5"></path>
+                            <path d="m15.5 8.5 2 2"></path>
+                            <path d="m18 6 2 2"></path>
+                        </svg>
+                        Log Out
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="workspace">
+            <section class="insights-card" aria-labelledby="insightsTitle">
+                <div class="insights-copy">
+                    <h1 class="eyebrow" id="insightsTitle">Welcome to Reports</h1>
+                    <h2>Insights that help you order smarter</h2>
+                    <p>Explore reports and track key metrics to optimise your inventory, control costs and improve
+                        efficiency.</p>
+                </div>
+
+            </section>
+
+            <section class="reports-grid" id="reportsGrid" aria-label="Available reports">
+                <button class="report-card theme-indigo" type="button" data-report="order-report"
+                    data-search="order report order performance">
+                    <span class="report-content">
+                        <span class="report-title-row"><span class="report-title">Order Report</span></span>
+                        <p>View and analyse your order performance.</p>
+                    </span>
+                    <span class="report-card-note">Track orders, suppliers and fulfilments</span>
+                    <span class="report-card-arrow" aria-hidden="true">&rarr;</span>
+                </button>
+
+                <button class="report-card theme-teal" type="button" data-report="spend"
+                    data-search="spend spending trends cost analysis">
+                    <span class="report-content">
+                        <span class="report-title-row"><span class="report-title">Spend Report</span></span>
+                        <p>Track spending trends and cost analysis.</p>
+                    </span>
+                    <span class="report-card-note">Monitor expenditure and cost areas</span>
+                    <span class="report-card-arrow" aria-hidden="true">&rarr;</span>
+                </button>
+
+                <button class="report-card theme-amber" type="button" data-report="out-of-stock"
+                    data-search="order exceptions report out of stock supplier responses unavailable restricted unprocessed">
+                    <span class="report-content">
+                        <span class="report-title-row"><span class="report-title">Order Exceptions Report</span></span>
+                        <p>Review supplier responses and take the next step.</p>
+                    </span>
+                    <span class="report-card-note">Track unavailable, restricted and unprocessed order lines.</span>
+                    <span class="report-card-arrow" aria-hidden="true">&rarr;</span>
+                </button>
+
+                <button class="report-card theme-red" type="button" data-report="profit-margin"
+                    data-search="profit margin profit margins performance">
+                    <span class="report-content">
+                        <span class="report-title-row"><span class="report-title">Profit Margin Report</span></span>
+                        <p>Analyse profit margins and performance.</p>
+                    </span>
+                    <span class="report-card-note">Review margins and profitability</span>
+                    <span class="report-card-arrow" aria-hidden="true">&rarr;</span>
+                </button>
+
+                <button class="report-card theme-blue" type="button" data-report="moving-lines"
+                    data-search="moving lines fast slow moving products">
+                    <span class="report-content">
+                        <span class="report-title-row"><span class="report-title">Moving Lines Report</span></span>
+                        <p>Identify fast and slow moving products.</p>
+                    </span>
+                    <span class="report-card-note">Optimise inventory movement</span>
+                    <span class="report-card-arrow" aria-hidden="true">&rarr;</span>
+                </button>
+
+                <button class="report-card theme-violet" type="button" data-report="savings-report"
+                    data-search="savings report supplier price savings opportunities new">
+                    <span class="report-content">
+                        <span class="report-title-row"><span class="report-title">Savings Report</span></span>
+                        <p>Track your supplier price savings and opportunities.</p>
+                    </span>
+                    <span class="report-card-note">Discover savings and opportunities</span>
+                    <span class="report-card-arrow" aria-hidden="true">&rarr;</span>
+                </button>
+
+                <button class="report-card theme-green" type="button" data-report="supplier-spend-target"
+                    data-search="supplier target report spend target cap caps limit on track will exceed cap reached">
+                    <span class="report-content">
+                        <span class="report-title-row"><span class="report-title">Supplier Target Report</span></span>
+                        <p>Track spend against each supplier's cap.</p>
+                    </span>
+                    <span class="report-card-note">See who is on track, heading over or at their cap</span>
+                    <span class="report-card-arrow" aria-hidden="true">&rarr;</span>
+                </button>
+            </section>
+
+            <section class="empty-state" id="emptyState" hidden>
+                <span>No reports match your search.</span>
+            </section>
+            <footer class="site-footer">© 2019-2026 Cascade Plus. All rights reserved. Powered by LuxshTech.</footer>
+        </main>
+    </div>
+
+    <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="account-menu.js"></script>
+    <script>
+        const toastRegion = document.querySelector("#toastRegion");
+        const reportCards = Array.from(document.querySelectorAll("[data-report]"));
+
+        function toast(message) {
+            const node = document.createElement("div");
+            node.className = "toast";
+            node.textContent = message;
+            toastRegion.appendChild(node);
+            window.setTimeout(() => {
+                node.style.opacity = "0";
+                node.style.transform = "translateY(-8px)";
+                window.setTimeout(() => node.remove(), 180);
+            }, 2400);
+        }
+
+        reportCards.forEach((card) => {
+            card.addEventListener("click", () => {
+                if (card.dataset.report === "order-report") {
+                    window.location.href = "Order_Report.html";
+                    return;
+                }
+                if (card.dataset.report === "spend") {
+                    window.location.href = "spend_report.html";
+                    return;
+                }
+                if (card.dataset.report === "out-of-stock") {
+                    window.location.href = "oosreport.html";
+                    return;
+                }
+                if (card.dataset.report === "profit-margin") {
+                    window.location.href = "profit.html";
+                    return;
+                }
+                if (card.dataset.report === "savings-report") {
+                    window.location.href = "savings.html";
+                    return;
+                }
+                if (card.dataset.report === "moving-lines") {
+                    window.location.href = "moving.html";
+                    return;
+                }
+                if (card.dataset.report === "supplier-spend-target") {
+                    window.location.href = "supplier-target-report.html";
+                    return;
+                }
+                const title = card.querySelector(".report-title").textContent;
+                toast(`${title} will open here once the report is ready.`);
+            });
+        });
+    </script>
+</body>
+
+</html>

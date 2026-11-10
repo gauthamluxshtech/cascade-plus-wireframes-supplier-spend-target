@@ -1,0 +1,1566 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CASCADE Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Dashboard-specific Styles */
+    body {
+      --dashboard-section-gap: 14px;
+      background: #f6f8f7;
+      background-attachment: fixed;
+      background-size: cover;
+      background-position: center bottom;
+    }
+
+    /* The Dashboard fills the screen: the pie charts grow with the screen height (250px up to 330px) and the
+       two chart cards take any height left over, so the copyright line sits at the bottom of the screen
+       with no empty space under it and no scrolling on a full-HD screen. */
+    body {
+      --pie-size: clamp(250px, calc(100vh - 625px), 330px);
+    }
+
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-shell>.workspace {
+      flex: 1 0 auto;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .charts-grid {
+      flex: 1 0 auto;
+    }
+
+    .workspace {
+      padding-top: 18px;
+      padding-bottom: 10px;
+    }
+
+    .site-footer {
+      margin-top: 4px;
+      padding: 10px 0 0;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 0;
+      margin-bottom: var(--dashboard-section-gap);
+    }
+
+    .dashboard-card {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 18px 20px;
+      box-shadow: 0 7px 18px rgba(23, 33, 47, 0.08);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 82px;
+      align-items: end;
+      gap: 14px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      min-height: 118px;
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .card-left {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      min-width: 0;
+    }
+
+    .card-icon-container {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .card-icon-container.green {
+      background: #dff8ed;
+      color: #047857;
+    }
+
+    .card-icon-container.blue {
+      background: #e5f7f2;
+      color: #0e7490;
+    }
+
+    .card-icon-container.orange {
+      background: #fff4df;
+      color: #d97706;
+    }
+
+    .card-icon-container.teal {
+      background: #d9f4ef;
+      color: #047857;
+    }
+
+    .card-icon-container svg {
+      width: 26px;
+      height: 26px;
+      stroke-width: 2;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    .card-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-label {
+      font-size: 16px;
+      font-weight: 600;
+      color: #17212f;
+      margin-bottom: 7px;
+    }
+
+    .card-value {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    #ordersCard .card-value {
+      color: #047857;
+    }
+
+    #productsCard .card-value {
+      color: #0e7490;
+    }
+
+    #oosCard .card-value {
+      color: #d97706;
+    }
+
+    #spendCard .card-value {
+      color: #047857;
+    }
+
+    .card-trend {
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .card-trend.up {
+      color: #10b981;
+    }
+
+    .card-trend.down {
+      color: #d97706;
+    }
+
+    .card-trend span {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .card-right {
+      width: 78px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      align-self: end;
+      margin-bottom: 3px;
+    }
+
+    .sparkline-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .sparkline-path {
+      fill: none;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Date controls styling */
+    .dashboard-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: var(--dashboard-section-gap);
+    }
+
+    .dashboard-hero-heading {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 22px;
+      margin-bottom: var(--dashboard-section-gap);
+    }
+
+    .dashboard-hero-heading .heading-copy {
+      align-self: center;
+    }
+
+    /* Double column charts grid */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: var(--dashboard-section-gap);
+    }
+
+    .chart-card {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 16px 18px 14px;
+      box-shadow: 0 7px 18px rgba(23, 33, 47, 0.08);
+      display: flex;
+      flex-direction: column;
+      min-height: 240px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .chart-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+      margin: 0;
+    }
+
+    .chart-content-row {
+      display: grid;
+      grid-template-columns: minmax(180px, 0.9fr) minmax(280px, 1.3fr);
+      gap: 20px;
+      align-items: center;
+      flex: 1;
+    }
+
+    /* Pie chart SVG styles */
+    .pie-wrap {
+      position: relative;
+      width: var(--pie-size);
+      height: var(--pie-size);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+    }
+
+    .pie-chart {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .pie-chart svg {
+      overflow: visible;
+    }
+
+    .pie-slice {
+      cursor: pointer;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+      transform-origin: 50px 50px;
+    }
+
+    .pie-slice:hover {
+      opacity: 0.9;
+    }
+
+    .pie-slice.is-active {
+      opacity: 0.95;
+    }
+
+    .pie-tooltip {
+      position: absolute;
+      pointer-events: none;
+      z-index: 10;
+      border-radius: 6px;
+      padding: 5px 9px;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+      opacity: 0;
+      transform: translate(-50%, -100%) scale(0.9);
+      transition: opacity 0.12s ease, transform 0.12s ease;
+    }
+
+    .pie-wrap.is-hovering .pie-tooltip {
+      opacity: 1;
+      transform: translate(-50%, -100%) scale(1);
+    }
+
+    /* Legend Tables */
+    .legend-table {
+      width: 100%;
+      max-width: none;
+      justify-self: stretch;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .legend-table th {
+      text-align: left;
+      color: var(--muted);
+      font-weight: 700;
+      padding: 6px 4px;
+      border-bottom: 1px solid var(--line);
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0;
+    }
+
+    .legend-table td {
+      padding: 8px 4px;
+      border-bottom: 1px solid rgba(217, 224, 232, 0.3);
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .legend-table th:first-child,
+    .legend-table td:first-child {
+      width: 45%;
+    }
+
+    .legend-table th:not(:first-child),
+    .legend-table td:not(:first-child) {
+      width: 27.5%;
+    }
+
+    .legend-table tr:last-child td {
+      border-bottom: 0;
+      font-weight: 800;
+      border-top: 1px solid var(--line);
+      background: #fafbfe;
+    }
+
+    .supplier-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .supplier-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .legend-table .num {
+      text-align: right;
+    }
+
+    /* Full width line chart */
+    .full-width-card {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 18px 20px 12px;
+      box-shadow: 0 7px 18px rgba(23, 33, 47, 0.08);
+      margin-bottom: var(--dashboard-section-gap);
+    }
+
+    .savings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .segmented-control {
+      display: flex;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      gap: 0;
+      overflow: hidden;
+    }
+
+    .segmented-button {
+      border: 0;
+      background: transparent;
+      border-right: 1px solid var(--line);
+      padding: 8px 16px;
+      border-radius: 0;
+      font-size: 11px;
+      font-weight: 700;
+      color: #17212f;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .segmented-button:last-child {
+      border-right: 0;
+    }
+
+    .segmented-button.active {
+      background: var(--green);
+      color: #ffffff;
+    }
+
+    .line-chart-container {
+      position: relative;
+      height: 245px;
+      margin-top: 22px;
+    }
+
+    .line-chart-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .grid-line {
+      stroke: rgba(217, 224, 232, 0.65);
+      stroke-width: 1;
+    }
+
+    .axis-label {
+      font-size: 12px;
+      font-weight: 600;
+      fill: #4b5563;
+    }
+
+    .axis-title {
+      font-size: 12px;
+      font-weight: 600;
+      fill: #4b5563;
+    }
+
+    .chart-line {
+      fill: none;
+      stroke: #004b32;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .chart-area {
+      fill: url(#savings-gradient);
+    }
+
+    .chart-point {
+      fill: #027a52;
+      stroke: #ffffff;
+      stroke-width: 2;
+      cursor: pointer;
+      transition: r 0.15s, fill 0.15s;
+    }
+
+    .chart-point:hover {
+      r: 7;
+      fill: var(--green-dark);
+      stroke: #ffffff;
+    }
+
+    .line-tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: #111827;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: none;
+      transform: translate(-50%, -100%);
+      margin-top: -10px;
+      z-index: 10;
+    }
+
+    /* Bottom row: Quick Access to Reports (wide, report names in two columns) and Supplier Spend Targets. */
+    .dashboard-bottom {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr);
+      gap: 16px;
+      align-items: stretch;
+      margin-bottom: var(--dashboard-section-gap);
+    }
+
+    .target-card,
+    .quick-reports-panel {
+      min-width: 0;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      box-shadow: 0 7px 18px rgba(23, 33, 47, 0.08);
+    }
+
+    .target-card {
+      padding: 16px 18px 10px;
+    }
+
+    /* Title and More details on one line, the same height as the Quick Access heading. */
+    .target-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .target-more {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .target-more:hover,
+    .target-more:focus-visible {
+      text-decoration: underline;
+      outline: 0;
+    }
+
+    /* Supplier Spend Targets and Quick Access each show 4 rows at a time; any more scroll.
+       A row is 20px text + 5px padding above and below, with a 1px line between rows, so the bottom row
+       is about as tall as the old Quick Access panel and the Dashboard fits a 1920 x 1080 screen. */
+    .dashboard-bottom {
+      --bottom-row-height: 30px;
+      --bottom-list-height: calc(var(--bottom-row-height) * 4 + 3px);
+    }
+
+    .target-scroll,
+    .quick-reports-scroll {
+      max-height: var(--bottom-list-height);
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    /* Sits at the bottom of its card, so its rows line up with the Spend Targets rows. */
+    .quick-reports-scroll {
+      margin-top: auto;
+    }
+
+    .target-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .target-list li+li {
+      border-top: 1px solid rgba(217, 224, 232, 0.6);
+    }
+
+    .target-row {
+      display: grid;
+      grid-template-columns: minmax(110px, 170px) minmax(0, 1fr) 46px;
+      align-items: center;
+      gap: 14px;
+      border-radius: 6px;
+      padding: 5px 6px;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 20px;
+      text-decoration: none;
+    }
+
+    .target-row:hover,
+    .target-row:focus-visible {
+      background: #f6fffb;
+      outline: 0;
+    }
+
+    .target-name {
+      overflow: hidden;
+      font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .target-bar {
+      position: relative;
+      height: 8px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #f1f5f9;
+    }
+
+    .target-bar i {
+      position: absolute;
+      inset: 0 auto 0 0;
+      border-radius: 999px;
+      background: #10b981;
+    }
+
+    .target-bar i.warn {
+      background: #eab308;
+    }
+
+    .target-bar i.over {
+      background: #f97316;
+    }
+
+    .target-percent {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    .target-empty {
+      margin: 8px 0 6px;
+      border: 1px dashed var(--line);
+      border-radius: 7px;
+      padding: 18px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .target-empty a {
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .quick-reports-panel {
+      display: flex;
+      flex-direction: column;
+      padding: 16px 18px 10px;
+    }
+
+    .quick-reports-panel h2 {
+      margin: 0 0 8px;
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.25;
+      font-weight: 700;
+    }
+
+
+    /* Two columns, filled across: 4 rows hold 8 reports before the list scrolls. */
+    .quick-reports-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 28px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .quick-reports-list li {
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .quick-reports-list li:nth-child(-n+2) {
+      border-top: 0;
+    }
+
+    .quick-report-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 6px;
+      padding: 5px 6px;
+      color: #17212f;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 20px;
+      text-decoration: none;
+      transition: background 150ms ease, box-shadow 150ms ease;
+    }
+
+    .quick-report-link:hover,
+    .quick-report-link:focus-visible {
+      background: #fbfdff;
+      box-shadow: inset 0 0 0 1px #cfd6df;
+      outline: 0;
+    }
+
+    .quick-report-arrow {
+      margin-left: auto;
+      color: #344054;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .quick-report-badge {
+      min-height: 20px;
+      border-radius: 999px;
+      padding: 0 8px;
+      display: inline-flex;
+      align-items: center;
+      color: #fff;
+      background: #7e22ce;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    /* Anim for elements */
+    .pie-slice {
+      animation: drawSlice 0.5s ease forwards;
+    }
+
+    @keyframes drawSlice {
+      from {
+        stroke-dasharray: 0 300;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-bottom {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .chart-content-row {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .page-heading {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .dashboard-hero-heading {
+        align-items: flex-start;
+      }
+
+      .target-row {
+        grid-template-columns: minmax(90px, 120px) minmax(0, 1fr) 42px;
+        gap: 10px;
+      }
+
+      .quick-reports-list {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-reports-list li:nth-child(2) {
+        border-top: 1px solid #e5e7eb;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="navigation.css" />
+</head>
+
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="Dashboard.html" aria-label="CASCADE home">
+        <img class="brand-logo" src="logo.png" alt="CASCADE Plus" />
+      </a>
+      <nav class="main-nav" aria-label="Primary">
+        <a class="active" href="Dashboard.html" aria-current="page">Dashboard</a>
+        <a href="index.html">Order Pad</a>
+        <a href="history.html">Order History</a>
+        <a href="report.html">Reports</a>
+        <a href="help.html">Help</a>
+        <div class="nav-more">
+          <button class="more-toggle" type="button" aria-haspopup="true" aria-expanded="false">More</button>
+          <div class="more-menu" role="menu">
+            <a href="pending.html" role="menuitem">Pending Order</a>
+            <a href="outofstock.html" role="menuitem">Out Of Stock</a>
+            <a href="settings.html" role="menuitem">Settings</a>
+          </div>
+        </div>
+      </nav>
+      <div class="account-menu">
+        <button class="profile-button" type="button" aria-haspopup="true" aria-expanded="false">HI, dummy1</button>
+        <div class="account-dropdown" role="menu">
+          <button class="account-menu-item" type="button" role="menuitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 11.5 12 4l9 7.5"></path>
+              <path d="M5.5 10.5V20h13v-9.5"></path>
+              <path d="M9.5 17h5"></path>
+              <path d="M9 14h2"></path>
+              <path d="M13 14h2"></path>
+            </svg>
+            Reset Password
+          </button>
+          <span class="account-menu-separator" aria-hidden="true"></span>
+          <button class="account-menu-item" type="button" role="menuitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="7.5" cy="16.5" r="3"></circle>
+              <path d="m10 14 7.5-7.5"></path>
+              <path d="m15.5 8.5 2 2"></path>
+              <path d="m18 6 2 2"></path>
+            </svg>
+            Log Out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="page-heading dashboard-hero-heading" aria-labelledby="pageTitle">
+        <div class="heading-copy">
+          <h1 id="pageTitle">Dashboard</h1>
+          <p class="subheading">Welcome back! Here's your business overview.</p>
+        </div>
+      </section>
+
+      <div class="dashboard-controls">
+        <div class="segmented-control" id="dashboardRangeToggle" role="tablist" aria-label="Select dashboard period">
+          <button class="segmented-button active" type="button" role="tab" aria-selected="true"
+            data-range="today">Daily</button>
+          <button class="segmented-button" type="button" role="tab" aria-selected="false"
+            data-range="last7">Weekly</button>
+          <button class="segmented-button" type="button" role="tab" aria-selected="false"
+            data-range="thisMonth">Monthly</button>
+        </div>
+      </div>
+
+      <!-- KPI Metrics Cards Row -->
+      <section class="dashboard-grid" aria-label="Key Performance Indicators">
+        <!-- Card 1: Orders -->
+        <article class="dashboard-card" id="ordersCard">
+          <div class="card-left">
+            <div class="card-icon-container green" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M7 4h8l3 3v13H7z"></path>
+                <path d="M15 4v4h4"></path>
+                <path d="M10 13h5M10 17h5"></path>
+                <path d="M5 8h3M5 12h3M5 16h3"></path>
+              </svg>
+            </div>
+            <div class="card-info">
+              <span class="card-label">No. Orders Submitted</span>
+              <strong class="card-value" id="ordersVal">0</strong>
+              <div class="card-trend up" id="ordersTrend">
+                <span>vs last period</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-right" id="ordersSparkline"></div>
+        </article>
+
+        <!-- Card 2: Products -->
+        <article class="dashboard-card" id="productsCard">
+          <div class="card-left">
+            <div class="card-icon-container blue" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                <line x1="12" y1="22.08" x2="12" y2="12" />
+              </svg>
+            </div>
+            <div class="card-info">
+              <span class="card-label">No. Products Submitted</span>
+              <strong class="card-value" id="productsVal">0</strong>
+              <div class="card-trend up" id="productsTrend">
+                <span>vs last period</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-right" id="productsSparkline"></div>
+        </article>
+
+        <!-- Card 3: Out Of Stock -->
+        <article class="dashboard-card" id="oosCard">
+          <div class="card-left">
+            <div class="card-icon-container orange" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <div class="card-info">
+              <span class="card-label">% Out of Stock Lines</span>
+              <strong class="card-value" id="oosVal">0.00%</strong>
+              <div class="card-trend down" id="oosTrend">
+                <span>vs last period</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-right" id="oosSparkline"></div>
+        </article>
+
+        <!-- Card 4: Total Spend -->
+        <article class="dashboard-card" id="spendCard">
+          <div class="card-left">
+            <div class="card-icon-container teal" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M15 5.5c-.7-1-1.8-1.5-3.2-1.5C9.7 4 8 5.4 8 7.5V18"></path>
+                <path d="M5 11h8M5 18h12"></path>
+              </svg>
+            </div>
+            <div class="card-info">
+              <span class="card-label">Total Spend</span>
+              <strong class="card-value" id="spendVal">£0.00</strong>
+              <div class="card-trend up" id="spendTrend">
+                <span>vs last period</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-right" id="spendSparkline"></div>
+        </article>
+      </section>
+
+      <!-- Charts Section (Spend and Profit Pie Charts) -->
+      <section class="charts-grid" aria-label="Distributions Analysis">
+        <!-- Spend by Supplier Card -->
+        <article class="chart-card">
+          <div class="chart-header">
+            <h2 class="chart-title">Spend by Supplier</h2>
+          </div>
+          <div class="chart-content-row">
+            <div class="pie-wrap" id="spendPieWrap">
+              <div id="spendPieChart" class="pie-chart" role="img" aria-label="Spend by supplier pie chart"></div>
+              <div id="spendPieTooltip" class="pie-tooltip" role="status"></div>
+            </div>
+            <table class="legend-table" id="spendTable">
+              <thead>
+                <tr>
+                  <th>Supplier</th>
+                  <th class="num">Spend</th>
+                  <th class="num">% of Total</th>
+                </tr>
+              </thead>
+              <tbody id="spendTableBody"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <!-- Profit Margin by Supplier Card -->
+        <article class="chart-card">
+          <div class="chart-header">
+            <h2 class="chart-title">Profit Margin by Supplier</h2>
+          </div>
+          <div class="chart-content-row">
+            <div class="pie-wrap" id="profitPieWrap">
+              <div id="profitPieChart" class="pie-chart" role="img" aria-label="Profit margin by supplier pie chart">
+              </div>
+              <div id="profitPieTooltip" class="pie-tooltip" role="status"></div>
+            </div>
+            <table class="legend-table" id="profitTable">
+              <thead>
+                <tr>
+                  <th>Supplier</th>
+                  <th class="num">Profit</th>
+                  <th class="num">Margin (%)</th>
+                </tr>
+              </thead>
+              <tbody id="profitTableBody"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <div class="dashboard-bottom">
+        <!-- Quick Access to Reports (wide, report names in two columns) left; Supplier Spend Targets right. -->
+        <section class="quick-reports-panel" aria-labelledby="quickReportsTitle">
+          <h2 id="quickReportsTitle">Quick Access to Reports</h2>
+          <div class="quick-reports-scroll" tabindex="0" aria-label="Reports">
+            <ul class="quick-reports-list">
+              <li><a class="quick-report-link" href="Order_Report.html">Order Report<span class="quick-report-arrow" aria-hidden="true">&rarr;</span></a></li>
+              <li><a class="quick-report-link" href="spend_report.html">Spend Report<span class="quick-report-arrow" aria-hidden="true">&rarr;</span></a></li>
+              <li><a class="quick-report-link" href="oosreport.html">Order Exceptions Report<span class="quick-report-arrow" aria-hidden="true">&rarr;</span></a></li>
+              <li><a class="quick-report-link" href="profit.html">Profit Margin Report<span class="quick-report-arrow" aria-hidden="true">&rarr;</span></a></li>
+              <li><a class="quick-report-link" href="moving.html">Moving Lines Report<span class="quick-report-arrow" aria-hidden="true">&rarr;</span></a></li>
+              <li><a class="quick-report-link" href="savings.html">Savings Report<span class="quick-report-arrow" aria-hidden="true">&rarr;</span></a></li>
+              <li><a class="quick-report-link" href="supplier-target-report.html">Supplier Target Report<span class="quick-report-arrow" aria-hidden="true">&rarr;</span></a></li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Supplier Spend Targets: each supplier with a cap running now and how much of it is used. -->
+        <section class="target-card" aria-labelledby="targetCardTitle">
+          <div class="target-card-header">
+            <h2 class="chart-title" id="targetCardTitle">Supplier Spend Targets</h2>
+            <a class="target-more" href="supplier-target-report.html">More details <span aria-hidden="true">&rarr;</span></a>
+          </div>
+          <div id="targetCardBody"></div>
+        </section>
+      </div>
+
+      <footer class="site-footer">© 2019-2026 Cascade Plus. All rights reserved. Powered by LuxshTech.</footer>
+    </main>
+  </div>
+
+  <script src="account-menu.js"></script>
+  <script src="orderhistory-data.js"></script>
+  <script src="supplier-targets.js"></script>
+  <script>
+    // Supplier Spend Targets card: supplier and used of cap; a row or More details opens the report.
+    (function renderSupplierTargetCard() {
+      const targets = window.CascadeSupplierTargets;
+      const body = document.querySelector("#targetCardBody");
+      if (!targets || !body) return;
+      const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+      const rows = targets.currentProgress();
+      if (!rows.length) {
+        body.innerHTML = `<p class="target-empty">${targets.getTargets().length
+          ? "No spend targets are running in their current period."
+          : 'No spend targets set. Set a maximum cap for a supplier in <a href="settings.html#supplierTargets">Settings</a>.'}</p>`;
+        return;
+      }
+      body.innerHTML = `<div class="target-scroll" ${rows.length > 4 ? 'tabindex="0" aria-label="Supplier spend targets"' : ""}><ul class="target-list">${rows.map((row) => {
+        const tone = row.tone === "good" ? "" : row.tone;
+        return `<li><a class="target-row" href="${targets.reportUrl(row.supplierId)}" aria-label="${escapeHtml(row.supplier)}, ${Math.round(row.percent)}% of cap used, ${escapeHtml(row.statusLabel)}">
+          <span class="target-name">${escapeHtml(row.supplier)}</span>
+          <span class="target-bar" aria-hidden="true"><i class="${tone}" style="width:${Math.min(100, row.percent).toFixed(1)}%"></i></span>
+          <span class="target-percent">${Math.round(row.percent)}%</span>
+        </a></li>`;
+      }).join("")}</ul></div>`;
+    })();
+  </script>
+  <script>
+    const supplierColours = {
+      "AAH": "#8b5cd6",
+      "Alliance": "#3f7edb",
+      "Phoenix": "#0cb2a6",
+      "B&S Distribution": "#8da8dc",
+      "Ethigen": "#82b84b",
+      "OTC Direct": "#f0ad4e"
+    };
+    const colours = ["#8b5cd6", "#3f7edb", "#0cb2a6", "#8da8dc", "#82b84b", "#f0ad4e", "#e36b73", "#63748b"];
+
+    // Dashboard Data Model
+    const dashboardData = {
+      today: {
+        dateLabel: "03 Jul 2026",
+        cards: {
+          orders: { val: "12", trend: "↗ 9.1%", spark: [8, 12, 10, 15, 11, 12] },
+          products: { val: "38", trend: "↗ 12.4%", spark: [20, 28, 22, 35, 29, 38] },
+          oos: { val: "4.16%", trend: "↘ -0.8%", spark: [4.8, 4.5, 4.6, 4.2, 4.3, 4.16], isDown: true },
+          spend: { val: "£1,154.60", trend: "↗ 8.5%", spark: [800, 1100, 950, 1200, 1000, 1154.6] }
+        },
+        spendSuppliers: [
+          { supplier: "AAH", spend: 450.00, percent: "38.97%" },
+          { supplier: "Alliance", spend: 380.00, percent: "32.91%" },
+          { supplier: "Phoenix", spend: 174.60, percent: "15.12%" },
+          { supplier: "B&S Distribution", spend: 90.00, percent: "7.79%" },
+          { supplier: "Ethigen", spend: 60.00, percent: "5.20%" }
+        ],
+        profitSuppliers: [
+          { supplier: "B&S Distribution", profit: 15.20, margin: "26.32%" },
+          { supplier: "Ethigen", profit: 11.10, margin: "35.80%" },
+          { supplier: "Alliance", profit: 8.50, margin: "39.50%" },
+          { supplier: "Phoenix", profit: 16.30, margin: "34.00%" },
+          { supplier: "AAH", profit: 2.10, margin: "21.50%" }
+        ],
+        savings: {
+          xAxis: ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"],
+          values: [35, 75, 45, 110, 80, 150],
+          yMax: 200,
+          yLabels: ["£0", "£50", "£100", "£150", "£200"]
+        }
+      },
+      yesterday: {
+        dateLabel: "02 Jul 2026",
+        cards: {
+          orders: { val: "11", trend: "↘ -8.3%", spark: [12, 10, 11, 9, 12, 11], isDown: true },
+          products: { val: "34", trend: "↘ -10.5%", spark: [38, 30, 32, 28, 35, 34], isDown: true },
+          oos: { val: "4.20%", trend: "↗ 0.1%", spark: [4.16, 4.3, 4.25, 4.35, 4.18, 4.2], isDown: false },
+          spend: { val: "£1,064.20", trend: "↘ -7.8%", spark: [1154, 980, 1020, 910, 1100, 1064], isDown: true }
+        },
+        spendSuppliers: [
+          { supplier: "AAH", spend: 420.00, percent: "39.47%" },
+          { supplier: "Alliance", spend: 340.00, percent: "31.95%" },
+          { supplier: "Phoenix", spend: 164.20, percent: "15.43%" },
+          { supplier: "B&S Distribution", spend: 85.00, percent: "7.99%" },
+          { supplier: "Ethigen", spend: 55.00, percent: "5.17%" }
+        ],
+        profitSuppliers: [
+          { supplier: "B&S Distribution", profit: 14.50, margin: "26.00%" },
+          { supplier: "Ethigen", profit: 10.50, margin: "35.00%" },
+          { supplier: "Alliance", profit: 8.00, margin: "39.00%" },
+          { supplier: "Phoenix", profit: 15.50, margin: "34.00%" },
+          { supplier: "AAH", profit: 2.00, margin: "21.00%" }
+        ],
+        savings: {
+          xAxis: ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"],
+          values: [30, 65, 55, 95, 70, 130],
+          yMax: 200,
+          yLabels: ["£0", "£50", "£100", "£150", "£200"]
+        }
+      },
+      last7: {
+        dateLabel: "27 Jun 2026 - 03 Jul 2026",
+        cards: {
+          orders: { val: "148", trend: "↗ 8.2%", spark: [20, 18, 25, 22, 28, 24, 30] },
+          products: { val: "562", trend: "↗ 5.1%", spark: [75, 68, 85, 79, 90, 81, 98] },
+          oos: { val: "5.24%", trend: "↘ -0.5%", spark: [5.8, 5.7, 5.5, 5.6, 5.4, 5.3, 5.24], isDown: true },
+          spend: { val: "£4,956.60", trend: "↗ 9.7%", spark: [650, 610, 780, 710, 820, 750, 900] }
+        },
+        spendSuppliers: [
+          { supplier: "AAH", spend: 1850.33, percent: "37.33%" },
+          { supplier: "Alliance", spend: 1620.13, percent: "32.69%" },
+          { supplier: "Phoenix", spend: 780.53, percent: "15.75%" },
+          { supplier: "B&S Distribution", spend: 385.55, percent: "7.78%" },
+          { supplier: "Ethigen", spend: 320.06, percent: "6.46%" }
+        ],
+        profitSuppliers: [
+          { supplier: "B&S Distribution", profit: 65.42, margin: "32.77%" },
+          { supplier: "Ethigen", profit: 52.40, margin: "36.18%" },
+          { supplier: "Alliance", profit: 39.95, margin: "39.30%" },
+          { supplier: "Phoenix", profit: 78.68, margin: "34.80%" },
+          { supplier: "AAH", profit: 10.39, margin: "21.77%" }
+        ],
+        savings: {
+          xAxis: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+          values: [350, 480, 420, 650, 550, 800, 650],
+          yMax: 1000,
+          yLabels: ["£0", "£250", "£500", "£750", "£1,000"]
+        }
+      },
+      thisMonth: {
+        dateLabel: "01 Jul 2026 - 14 Jul 2026",
+        cards: {
+          orders: { val: "1,248", trend: "↗ 12.5% vs last 14 days", spark: [80, 95, 85, 105, 90, 110, 95, 120, 115, 100, 110, 105, 125, 135] },
+          products: { val: "3,562", trend: "↗ 8.3% vs last 14 days", spark: [250, 290, 270, 310, 280, 330, 290, 350, 340, 300, 320, 310, 360, 370] },
+          oos: { val: "6.42%", trend: "↘ -1.3% vs last 14 days", spark: [6.8, 6.7, 6.9, 6.6, 6.5, 6.62, 6.55, 6.48, 6.45, 6.52, 6.49, 6.47, 6.43, 6.42], isDown: true },
+          spend: { val: "£33,956.60", trend: "↗ 10.7% vs last 14 days", spark: [2200, 2500, 2300, 2700, 2400, 2900, 2600, 3100, 3000, 2700, 2900, 2800, 3300, 3400] }
+        },
+        spendSuppliers: [
+          { supplier: "AAH", spend: 12222.33, percent: "35.99%" },
+          { supplier: "Alliance", spend: 11298.13, percent: "33.27%" },
+          { supplier: "Phoenix", spend: 5403.53, percent: "15.91%" },
+          { supplier: "B&S Distribution", spend: 2636.55, percent: "7.76%" },
+          { supplier: "Ethigen", spend: 2396.06, percent: "7.06%" }
+        ],
+        profitSuppliers: [
+          { supplier: "B&S Distribution", profit: 450.42, margin: "32.77%" },
+          { supplier: "Ethigen", profit: 360.40, margin: "36.18%" },
+          { supplier: "Alliance", profit: 275.95, margin: "39.30%" },
+          { supplier: "Phoenix", profit: 544.68, margin: "34.80%" },
+          { supplier: "AAH", profit: 71.39, margin: "21.77%" }
+        ],
+        savings: {
+          xAxis: ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5"],
+          values: [4650, 5800, 5100, 6900, 7400],
+          yMax: 8000,
+          yLabels: ["£0", "£2,000", "£4,000", "£6,000", "£8,000"]
+        }
+      },
+      previousMonth: {
+        dateLabel: "01 Jun 2026 - 30 Jun 2026",
+        cards: {
+          orders: { val: "2,450", trend: "↗ 5.8% vs May", spark: [70, 75, 80, 78, 82, 85, 90, 88, 92, 95] },
+          products: { val: "7,120", trend: "↗ 4.2% vs May", spark: [200, 210, 220, 215, 230, 235, 245, 240, 250, 255] },
+          oos: { val: "7.12%", trend: "↗ 0.4% vs May", spark: [6.9, 7.0, 7.1, 7.05, 7.15, 7.2, 7.18, 7.14, 7.16, 7.12], isDown: false },
+          spend: { val: "£68,420.50", trend: "↗ 6.7% vs May", spark: [6000, 6200, 6500, 6300, 6700, 6800, 7100, 6900, 7200, 7400] }
+        },
+        spendSuppliers: [
+          { supplier: "AAH", spend: 25120.30, percent: "36.71%" },
+          { supplier: "Alliance", spend: 22410.80, percent: "32.75%" },
+          { supplier: "Phoenix", spend: 10850.40, percent: "15.86%" },
+          { supplier: "B&S Distribution", spend: 5120.00, percent: "7.48%" },
+          { supplier: "Ethigen", spend: 4919.00, percent: "7.19%" }
+        ],
+        profitSuppliers: [
+          { supplier: "B&S Distribution", profit: 915.20, margin: "33.10%" },
+          { supplier: "Ethigen", profit: 785.40, margin: "35.80%" },
+          { supplier: "Alliance", profit: 590.25, margin: "38.50%" },
+          { supplier: "Phoenix", profit: 1120.68, margin: "34.10%" },
+          { supplier: "AAH", profit: 180.12, margin: "22.10%" }
+        ],
+        savings: {
+          xAxis: ["05 Jun", "10 Jun", "15 Jun", "20 Jun", "25 Jun", "30 Jun"],
+          values: [1100, 1450, 1250, 1700, 1500, 1950],
+          yMax: 2000,
+          yLabels: ["£0", "£500", "£1,000", "£1,500", "£2,000"]
+        }
+      }
+    };
+
+    // Helper functions
+    const byId = (id) => document.getElementById(id);
+    const formatCurrency = new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", minimumFractionDigits: 2 }).format;
+    const formatNumber = new Intl.NumberFormat("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format;
+
+    // SVG arc details for Pie slice
+    function pointOnCircle(percent, radius = 43) {
+      const angle = (percent * 3.6 - 90) * Math.PI / 180;
+      return { x: 50 + radius * Math.cos(angle), y: 50 + radius * Math.sin(angle) };
+    }
+
+    function describeSlice(start, end) {
+      if (end - start >= 100) {
+        // Special case for complete circle (e.g. 100%)
+        return `M 50 50 m -43 0 a 43 43 0 1 0 86 0 a 43 43 0 1 0 -86 0`;
+      }
+      const startPoint = pointOnCircle(start);
+      const endPoint = pointOnCircle(end);
+      const largeArc = end - start > 50 ? 1 : 0;
+      return `M 50 50 L ${startPoint.x.toFixed(3)} ${startPoint.y.toFixed(3)} A 43 43 0 ${largeArc} 1 ${endPoint.x.toFixed(3)} ${endPoint.y.toFixed(3)} Z`;
+    }
+
+    function supplierColour(supplier, fallbackIndex = 0) {
+      return supplierColours[supplier] || colours[fallbackIndex % colours.length];
+    }
+
+    // Sparkline Path Generator
+    function drawSparkline(data, color) {
+      if (!data || data.length < 2) return "";
+      const width = 76;
+      const height = 32;
+      const min = Math.min(...data);
+      const max = Math.max(...data);
+      const range = max - min || 1;
+      const points = data.map((val, i) => {
+        const x = (i / (data.length - 1)) * width;
+        const y = height - ((val - min) / range) * (height - 6) - 3;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      }).join(" ");
+      return `<svg class="sparkline-svg" viewBox="0 0 ${width} ${height}"><polyline class="sparkline-path" points="${points}" stroke="${color}" fill="none"/></svg>`;
+    }
+
+    // Render Metrics Cards
+    function renderCards(cards) {
+      // Orders
+      byId("ordersVal").textContent = cards.orders.val;
+      byId("ordersSparkline").innerHTML = drawSparkline(cards.orders.spark, "#10b981");
+      updateTrend("ordersTrend", cards.orders.trend, cards.orders.isDown);
+
+      // Products
+      byId("productsVal").textContent = cards.products.val;
+      byId("productsSparkline").innerHTML = drawSparkline(cards.products.spark, "#3b82f6");
+      updateTrend("productsTrend", cards.products.trend, cards.products.isDown);
+
+      // Out of Stock
+      byId("oosVal").textContent = cards.oos.val;
+      byId("oosSparkline").innerHTML = drawSparkline(cards.oos.spark, "#f97316");
+      updateTrend("oosTrend", cards.oos.trend, cards.oos.isDown);
+
+      // Spend
+      byId("spendVal").textContent = cards.spend.val;
+      byId("spendSparkline").innerHTML = drawSparkline(cards.spend.spark, "#0f766e");
+      updateTrend("spendTrend", cards.spend.trend, cards.spend.isDown);
+    }
+
+    function updateTrend(id, trendText, isDown) {
+      const container = byId(id);
+      container.className = `card-trend ${isDown ? "down" : "up"}`;
+      const trendSymbol = isDown ? "&#8600;" : "&#8599;";
+      const trendValue = trendText.replace(/^[^\d-]+/, "").replace(/\s+vs\s+.+$/i, "");
+      container.innerHTML = `${trendSymbol} ${trendValue} <span>vs last period</span>`;
+    }
+
+    // Render Pie Chart Helper
+    function drawPie(chartId, tooltipId, wrapId, rows, isProfit = false) {
+      const chartEl = byId(chartId);
+      const tooltipEl = byId(tooltipId);
+      const wrapEl = byId(wrapId);
+      chartEl.innerHTML = "";
+
+      const valueKey = isProfit ? "profit" : "spend";
+      const total = rows.reduce((sum, row) => sum + row[valueKey], 0);
+      let progress = 0;
+      const slices = rows.map((row, index) => {
+        const start = progress;
+        const slicePercent = (row[valueKey] / total) * 100;
+        progress += slicePercent;
+        return {
+          label: row.supplier,
+          percent: slicePercent,
+          start,
+          end: progress,
+          mid: (start + progress) / 2,
+          color: supplierColour(row.supplier, index)
+        };
+      });
+
+      chartEl.innerHTML = `
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          ${slices.map((slice, index) => `
+            <path class="pie-slice" 
+                  data-index="${index}" 
+                  d="${describeSlice(slice.start, slice.end)}" 
+                  fill="${slice.color}" 
+                  style="animation-delay:${index * 55}ms">
+            </path>
+          `).join("")}
+        </svg>
+      `;
+
+      // Pointer interactive tooltips
+      function updateTooltip(event) {
+        const rect = chartEl.getBoundingClientRect();
+        const x = event.clientX - rect.left - rect.width / 2;
+        const y = event.clientY - rect.top - rect.height / 2;
+        const distance = Math.sqrt(x * x + y * y);
+        if (distance > rect.width / 2) {
+          wrapEl.classList.remove("is-hovering");
+          return;
+        }
+        const angle = (Math.atan2(y, x) * 180 / Math.PI + 450) % 360;
+        const percent = (angle / 360) * 100;
+        const slice = slices.find((item) => percent >= item.start && percent <= item.end) || slices[slices.length - 1];
+
+        // Highlight slice
+        document.querySelectorAll(`#${chartId} .pie-slice`).forEach((path, idx) => {
+          const active = slices[idx] === slice;
+          path.classList.toggle("is-active", active);
+          if (!active) {
+            path.removeAttribute("transform");
+            return;
+          }
+          const sliceAngle = (slice.mid * 3.6 - 90) * Math.PI / 180;
+          path.setAttribute("transform", `translate(${(Math.cos(sliceAngle) * 5).toFixed(2)} ${(Math.sin(sliceAngle) * 5).toFixed(2)})`);
+        });
+
+        const tooltipAngle = (slice.mid * 3.6 - 90) * Math.PI / 180;
+        tooltipEl.textContent = `${slice.label}: ${slice.percent.toFixed(2)}%`;
+        tooltipEl.style.left = `${rect.width / 2 + Math.cos(tooltipAngle) * rect.width * 0.3}px`;
+        tooltipEl.style.top = `${rect.height / 2 + Math.sin(tooltipAngle) * rect.height * 0.3}px`;
+        tooltipEl.style.background = slice.color;
+        wrapEl.classList.add("is-hovering");
+      }
+
+      chartEl.addEventListener("pointermove", updateTooltip);
+      chartEl.addEventListener("pointerleave", () => {
+        wrapEl.classList.remove("is-hovering");
+        document.querySelectorAll(`#${chartId} .pie-slice`).forEach((path) => {
+          path.classList.remove("is-active");
+          path.removeAttribute("transform");
+        });
+      });
+    }
+
+    // Render Tables
+    function renderTables(data) {
+      // Spend table
+      let spendHtml = "";
+      let spendSum = 0;
+      data.spendSuppliers.forEach((row, index) => {
+        spendSum += row.spend;
+        spendHtml += `
+          <tr>
+            <td>
+              <div class="supplier-cell">
+                <span class="supplier-color" style="background:${supplierColour(row.supplier, index)}"></span>
+                <span>${row.supplier}</span>
+              </div>
+            </td>
+            <td class="num">${formatCurrency(row.spend)}</td>
+            <td class="num">${row.percent}</td>
+          </tr>
+        `;
+      });
+      spendHtml += `
+        <tr>
+          <td><strong>Total</strong></td>
+          <td class="num"><strong>${formatCurrency(spendSum)}</strong></td>
+          <td class="num"><strong>100%</strong></td>
+        </tr>
+      `;
+      byId("spendTableBody").innerHTML = spendHtml;
+
+      // Profit table
+      let profitHtml = "";
+      let profitSum = 0;
+      let totalMargin = 0;
+      data.profitSuppliers.forEach((row, index) => {
+        profitSum += row.profit;
+        profitHtml += `
+          <tr>
+            <td>
+              <div class="supplier-cell">
+                <span class="supplier-color" style="background:${supplierColour(row.supplier, index)}"></span>
+                <span>${row.supplier}</span>
+              </div>
+            </td>
+            <td class="num">${formatCurrency(row.profit)}</td>
+            <td class="num">${row.margin}</td>
+          </tr>
+        `;
+      });
+
+      // Calculate total margin (mocked to match mockup if thisMonth)
+      let sumMarginText = "34.31%";
+      if (data === dashboardData.today) sumMarginText = "31.25%";
+      if (data === dashboardData.yesterday) sumMarginText = "31.00%";
+      if (data === dashboardData.last7) sumMarginText = "34.31%";
+      if (data === dashboardData.previousMonth) sumMarginText = "34.02%";
+
+      profitHtml += `
+        <tr>
+          <td><strong>Total</strong></td>
+          <td class="num"><strong>${formatCurrency(profitSum)}</strong></td>
+          <td class="num"><strong>${sumMarginText}</strong></td>
+        </tr>
+      `;
+      byId("profitTableBody").innerHTML = profitHtml;
+    }
+
+    // Render Savings Line Chart
+    function renderSavings(savings) {
+      const svg = byId("savingsLineChart");
+      const grid = byId("gridLines");
+      const path = byId("savingsPath");
+      const area = byId("savingsArea");
+      const ptsContainer = byId("chartPoints");
+      const axisTitle = byId("axisTitle");
+      const xLabels = byId("xAxisLabels");
+      const yLabels = byId("yAxisLabels");
+
+      // Reset
+      grid.innerHTML = "";
+      ptsContainer.innerHTML = "";
+      axisTitle.innerHTML = "";
+      xLabels.innerHTML = "";
+      yLabels.innerHTML = "";
+
+      const width = 1000;
+      const height = 220;
+      const paddingLeft = 125;
+      const paddingRight = 46;
+      const paddingTop = 64;
+      const paddingBottom = 34;
+
+      const chartW = width - paddingLeft - paddingRight;
+      const chartH = height - paddingTop - paddingBottom;
+      const maxVal = savings.yMax;
+      axisTitle.innerHTML = `<text class="axis-title" x="0" y="24">Savings (£)</text>`;
+
+      // Draw Grid Lines & Y Axis Labels
+      const gridCount = savings.yLabels.length;
+      for (let i = 0; i < gridCount; i++) {
+        const yPercent = i / (gridCount - 1);
+        const y = height - paddingBottom - yPercent * chartH;
+        grid.innerHTML += `<line class="grid-line" x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}"/>`;
+        yLabels.innerHTML += `<text class="axis-label" x="${paddingLeft - 36}" y="${y + 4}" text-anchor="end">${savings.yLabels[i]}</text>`;
+      }
+
+      // X Axis coordinates
+      const ptCount = savings.values.length;
+      const standardPointCount = 7;
+      const pointStep = chartW / (standardPointCount - 1);
+      const coords = savings.values.map((val, i) => {
+        const x = paddingLeft + i * pointStep;
+        const y = height - paddingBottom - (val / maxVal) * chartH;
+        return { x, y, value: val, label: savings.xAxis[i] };
+      });
+
+      // Path data
+      const lineD = coords.map((c, i) => `${i === 0 ? "M" : "L"} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(" ");
+      path.setAttribute("d", lineD);
+
+      const areaD = `${lineD} L ${coords[ptCount - 1].x.toFixed(1)} ${(height - paddingBottom).toFixed(1)} L ${coords[0].x.toFixed(1)} ${(height - paddingBottom).toFixed(1)} Z`;
+      area.setAttribute("d", areaD);
+
+      // Draw points & X Axis Labels
+      const tooltip = byId("lineTooltip");
+      const chartContainer = byId("lineChartContainer");
+
+      coords.forEach((pt, i) => {
+        // Label
+        const labelAnchor = i === 0 ? "start" : i === coords.length - 1 ? "end" : "middle";
+        xLabels.innerHTML += `<text class="axis-label" x="${pt.x}" y="${height - 4}" text-anchor="${labelAnchor}">${pt.label}</text>`;
+
+        // Point
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("class", "chart-point");
+        circle.setAttribute("cx", pt.x);
+        circle.setAttribute("cy", pt.y);
+        circle.setAttribute("r", "6");
+
+        // Hover event for line tooltip
+        circle.addEventListener("pointermove", (e) => {
+          tooltip.innerHTML = `<div>${pt.label}</div><div style="font-size:12px;margin-top:2px;">Savings: £${pt.value.toLocaleString("en-GB")}</div>`;
+          tooltip.style.display = "block";
+          const rect = chartContainer.getBoundingClientRect();
+          // Position relative to container
+          const leftPos = (pt.x / width) * rect.width;
+          const topPos = (pt.y / height) * rect.height;
+          tooltip.style.left = `${leftPos}px`;
+          tooltip.style.top = `${topPos}px`;
+        });
+
+        circle.addEventListener("pointerleave", () => {
+          tooltip.style.display = "none";
+        });
+
+        ptsContainer.appendChild(circle);
+      });
+    }
+
+    function rollingWeekdayLabels(date = new Date()) {
+      const labels = [];
+      const formatter = new Intl.DateTimeFormat("en-GB", { weekday: "long" });
+      for (let offset = 6; offset >= 0; offset--) {
+        const day = new Date(date);
+        day.setDate(date.getDate() - offset);
+        labels.push(formatter.format(day));
+      }
+      return labels;
+    }
+
+    // Refresh Dashboard Function
+    function refreshDashboard() {
+      const activeRange = document.querySelector("#dashboardRangeToggle .segmented-button.active");
+      const range = activeRange?.dataset.range || "today";
+      const data = dashboardData[range];
+
+      // Subtitle remains static as requested
+
+      // Render all sections
+      renderCards(data.cards);
+      drawPie("spendPieChart", "spendPieTooltip", "spendPieWrap", data.spendSuppliers, false);
+      drawPie("profitPieChart", "profitPieTooltip", "profitPieWrap", data.profitSuppliers, true);
+      renderTables(data);
+    }
+
+    // Interactive Listeners
+    document.querySelectorAll("#dashboardRangeToggle .segmented-button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#dashboardRangeToggle .segmented-button").forEach((button) => {
+          button.classList.remove("active");
+          button.setAttribute("aria-selected", "false");
+        });
+        btn.classList.add("active");
+        btn.setAttribute("aria-selected", "true");
+        refreshDashboard();
+      });
+    });
+
+    // Init load
+    window.addEventListener("DOMContentLoaded", refreshDashboard);
+  </script>
+</body>
+
+</html>

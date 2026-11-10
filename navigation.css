@@ -1,0 +1,239 @@
+/* Shared top-navigation refinements. Loaded after page-specific styles. */
+.topbar {
+  gap: 28px;
+  padding-inline: 28px;
+}
+
+.brand {
+  min-width: 116px;
+  min-height: 52px;
+  justify-content: center;
+  padding-inline: 4px;
+}
+
+.brand-logo {
+  height: 40px;
+  max-width: 112px;
+}
+
+.main-nav {
+  align-items: center;
+  gap: 10px;
+}
+
+.main-nav>a,
+.main-nav>button,
+.nav-more>.more-toggle {
+  min-height: 36px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding-inline: 18px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.main-nav>a:hover,
+.main-nav>a:focus-visible,
+.main-nav>button:hover,
+.main-nav>button:focus-visible,
+.nav-more:hover>.more-toggle,
+.nav-more:focus-within>.more-toggle {
+  color: #d1fae5;
+  border-color: rgba(52, 211, 153, 0.42);
+  background: rgba(16, 185, 129, 0.12);
+  box-shadow: inset 0 -2px 0 rgba(52, 211, 153, 0.75);
+  outline: 0;
+}
+
+.main-nav>a.active,
+.main-nav>button.active,
+.nav-more.active>.more-toggle {
+  position: relative;
+  margin-top: 0;
+  color: #ecfdf5;
+  border-color: #0f806b;
+  background: #0b3633;
+  box-shadow: inset 0 -2px 0 #10a881;
+}
+
+.nav-more.active {
+  margin-top: 0;
+}
+
+.nav-more {
+  align-items: center;
+}
+
+.more-menu {
+  top: calc(100% + 10px);
+  border: 1px solid #334155;
+  border-radius: 8px;
+  background: #111827;
+}
+
+/* Invisible bridge over the 10px gap under MORE, so the menu stays open while the mouse moves down to it. */
+.more-menu::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  right: 0;
+  left: 0;
+  height: 12px;
+}
+
+.main-nav .more-menu a {
+  min-height: 34px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  margin-top: 0;
+  padding-inline: 14px;
+  color: #f8fafc;
+  background: transparent;
+  box-shadow: none;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.main-nav .more-menu a:hover,
+.main-nav .more-menu a:focus-visible,
+.main-nav .more-menu a.active {
+  color: #d1fae5;
+  border-color: rgba(52, 211, 153, 0.42);
+  background: rgba(16, 185, 129, 0.12);
+  box-shadow: inset 0 -2px 0 rgba(52, 211, 153, 0.75);
+  outline: 0;
+}
+
+.profile-button {
+  min-height: 34px;
+  gap: 8px;
+  border-radius: 7px;
+  border-color: rgba(52, 211, 153, 0.26);
+  padding-inline: 14px;
+  color: #f3f4f6;
+  background: rgba(16, 185, 129, 0.07);
+  box-shadow: none;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.profile-button::after {
+  width: 0;
+  height: 0;
+  border: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid currentColor;
+  transform: none;
+}
+
+.profile-button:hover,
+.profile-button:focus-visible,
+.account-menu.is-open .profile-button {
+  color: #d1fae5;
+  border-color: rgba(52, 211, 153, 0.42);
+  background: rgba(16, 185, 129, 0.12);
+  box-shadow: inset 0 -2px 0 rgba(52, 211, 153, 0.75);
+}
+
+.account-dropdown {
+  width: min(196px, calc(100vw - 24px));
+  gap: 4px;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.account-menu-item {
+  min-height: 40px;
+  gap: 12px;
+  border-radius: 6px;
+  padding-inline: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  transition: color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.account-menu-item:hover,
+.account-menu-item:focus-visible {
+  color: #d1fae5;
+  background: rgba(16, 185, 129, 0.1);
+  box-shadow: inset 0 -2px 0 rgba(52, 211, 153, 0.65);
+}
+
+.account-menu-item svg {
+  width: 19px;
+  height: 19px;
+  stroke-width: 1.7;
+}
+
+.account-menu-separator {
+  margin: 2px 8px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 1100px) {
+  .topbar {
+    gap: 18px;
+    padding-inline: 18px;
+  }
+
+  .brand {
+    min-width: 104px;
+  }
+
+  .main-nav {
+    gap: 6px;
+  }
+
+  .main-nav>a,
+  .main-nav>button,
+  .nav-more>.more-toggle {
+    padding-inline: 12px;
+  }
+}
+
+@media (max-width: 820px) {
+  .topbar {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .brand {
+    min-width: 0;
+    min-height: 42px;
+    justify-self: start;
+    justify-content: flex-start;
+    padding: 0;
+  }
+
+  .brand-logo {
+    height: 36px;
+    max-width: 104px;
+  }
+
+  .main-nav {
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .main-nav>a,
+  .main-nav>button,
+  .nav-more>.more-toggle {
+    min-height: 34px;
+    padding-inline: 12px;
+  }
+}

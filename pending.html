@@ -1,0 +1,1352 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CASCADE Pending Orders</title>
+  <style>
+    :root {
+      --green: #047857;
+      --green-dark: #065f46;
+      --green-soft: #ecfdf5;
+      --table-header-gradient: linear-gradient(180deg, #d8f3e6 0%, #a9dfc6 100%);
+      --row-alt-gradient: linear-gradient(90deg, #ffffff 0%, #f7fbff 100%);
+      --row-active-gradient: linear-gradient(90deg, #f7fffb 0%, #e4faef 100%);
+      --ink: #17212f;
+      --muted: #667085;
+      --line: #d9e0e8;
+      --soft: #f6f8fa;
+      --app-bg: #f6f8f7;
+      --panel: #ffffff;
+      --red: #c24132;
+      --red-soft: #fff1f0;
+      --shadow: 0 18px 44px rgba(23, 33, 47, 0.14);
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background: var(--app-bg);
+      background-attachment: fixed;
+      background-size: cover;
+  background-position: center bottom;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      padding-bottom: 96px;
+    }
+
+    .topbar {
+      min-height: 64px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 22px;
+      padding: 0 24px;
+      color: #fff;
+      background: #111827;
+      box-shadow: 0 2px 8px rgba(6, 95, 70, 0.2);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .brand-logo {
+      width: auto;
+      height: 48px;
+      max-width: 124px;
+      object-fit: contain;
+    }
+
+    .main-nav {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      align-self: stretch;
+      overflow: visible;
+    }
+
+    .main-nav a,
+    .main-nav button,
+    .profile-button {
+      min-height: 44px;
+      border: 0;
+      border-radius: 8px 8px 0 0;
+      padding: 0 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 800;
+      text-decoration: none;
+      text-transform: uppercase;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .main-nav a.active,
+    .main-nav a:hover,
+    .main-nav button.active,
+    .main-nav button:hover,
+    .nav-more.active>.more-toggle,
+    .nav-more:hover>.more-toggle,
+    .nav-more:focus-within>.more-toggle {
+      color: var(--green);
+      background: #fff;
+    }
+
+    .main-nav a.active,
+    .main-nav button.active,
+    .nav-more.active {
+      position: relative;
+      margin-top: 12px;
+    }
+
+    .nav-more {
+      position: relative;
+      display: inline-flex;
+      align-items: flex-end;
+    }
+
+    .more-toggle {
+      gap: 8px;
+    }
+
+    .more-toggle::after {
+      content: "";
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 5px solid currentColor;
+    }
+
+    .more-menu {
+      position: absolute;
+      top: calc(100% - 1px);
+      left: 0;
+      z-index: 30;
+      min-width: 178px;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px;
+      border-radius: 0 0 8px 8px;
+      background: #fff;
+      box-shadow: 0 16px 34px rgba(15, 23, 42, 0.2);
+    }
+
+    .nav-more:hover .more-menu,
+    .nav-more:focus-within .more-menu {
+      display: flex;
+    }
+
+    .main-nav .more-menu a {
+      position: static;
+      min-height: 38px;
+      border-radius: 6px;
+      margin-top: 0;
+      padding: 0 12px;
+      color: var(--ink);
+      background: transparent;
+    }
+
+    .main-nav .more-menu a:hover,
+    .main-nav .more-menu a:focus-visible,
+    .main-nav .more-menu a.active {
+      color: #fff;
+      background: var(--green);
+    }
+
+    .profile-button {
+      min-height: 36px;
+      gap: 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .profile-button::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-right: 1.5px solid currentColor;
+      border-bottom: 1.5px solid currentColor;
+      transform: translateY(-2px) rotate(45deg);
+    }
+
+    .account-menu {
+      position: relative;
+      justify-self: end;
+    }
+
+    .account-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 60;
+      width: min(232px, calc(100vw - 24px));
+      display: none;
+      flex-direction: column;
+      padding: 8px 0;
+      border-radius: 8px;
+      color: rgba(255, 255, 255, 0.9);
+      background: #0f1726;
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.28);
+    }
+
+    .account-menu.is-open .account-dropdown {
+      display: flex;
+    }
+
+    .account-dropdown::before {
+      content: "";
+      position: absolute;
+      top: -9px;
+      right: 18px;
+      width: 18px;
+      height: 18px;
+      background: #0f1726;
+      border-radius: 3px 0 0 0;
+      transform: rotate(45deg);
+    }
+
+    .account-menu-item {
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border: 0;
+      padding: 0 16px;
+      color: rgba(255, 255, 255, 0.86);
+      background: transparent;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    .account-menu-item:hover,
+    .account-menu-item:focus-visible {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+      outline: 0;
+    }
+
+    .account-menu-item svg {
+      width: 22px;
+      height: 22px;
+      flex: 0 0 auto;
+      stroke: currentColor;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    .account-menu-separator {
+      height: 1px;
+      margin: 8px 0;
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .workspace {
+      max-width: 1420px;
+      margin: 0 auto;
+      padding: 24px 20px 40px;
+    }
+
+    .site-footer {
+      margin-top: 22px;
+      border-top: 1px solid rgba(217, 224, 232, 0.9);
+      padding: 22px 0 2px;
+      color: #7a879a;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .page-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .heading-copy {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 0;
+      font-size: 30px;
+      line-height: 1.12;
+    }
+
+    h2 {
+      margin-bottom: 0;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    .eyebrow {
+      margin: 0 0 5px;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .subheading {
+      margin: 0;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .status-pill {
+      min-height: 30px;
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0 11px;
+      color: var(--green-dark);
+      background: var(--green-soft);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .toolbar,
+    .modal-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 8px 22px rgba(23, 33, 47, 0.07);
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(240px, 1fr) auto;
+      gap: 14px;
+      align-items: end;
+      margin-bottom: 18px;
+      padding: 16px;
+      border-top: 4px solid var(--green);
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      align-self: end;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+    }
+
+    label span,
+    .meta-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    input {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: rgba(4, 120, 87, 0.65);
+      box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.12);
+    }
+
+    .orders-table-shell {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 8px 22px rgba(23, 33, 47, 0.07);
+    }
+
+    .pending-table {
+      width: 100%;
+      min-width: 1040px;
+      border-collapse: collapse;
+    }
+
+    .pending-table th,
+    .pending-table td {
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .pending-table th {
+      padding: 9px 12px;
+      color: #000;
+      background: var(--table-header-gradient);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .pending-table tbody tr {
+      height: 40px;
+      background: #fff;
+    }
+
+    .pending-table tbody tr:nth-child(odd) {
+      background: var(--row-alt-gradient);
+    }
+
+    .pending-table td {
+      padding: 5px 12px;
+    }
+
+    .pending-table th:nth-child(6),
+    .pending-table td:nth-child(6) {
+      text-align: center;
+    }
+
+    .pending-table tbody tr:hover,
+    .pending-table tbody tr.selected {
+      background: var(--row-active-gradient);
+    }
+
+    .pending-table tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .table-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 14px;
+      background: #fff;
+      font-size: 15px;
+    }
+
+    .entries-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .entries-control span {
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 500;
+      text-transform: none;
+    }
+
+    .entries-control select {
+      width: auto;
+      min-height: 28px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0 24px 0 6px;
+      color: var(--ink);
+      background: #fff;
+      font-size: 13px;
+    }
+
+    .pagination {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pagination button {
+      min-width: 34px;
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--ink);
+      background: #fff;
+      font-weight: 900;
+    }
+
+    .pagination button.active {
+      border-color: var(--green);
+      color: #fff;
+      background: var(--green);
+    }
+
+    .action-header,
+    .action-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .row-select,
+    .select-all {
+      width: 18px;
+      height: 18px;
+      min-height: 18px;
+      margin: 0;
+      padding: 0;
+      accent-color: var(--green);
+    }
+
+    .edit-icon-button {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(4, 120, 87, 0.28);
+      border-radius: 6px;
+      color: var(--green-dark);
+      background: var(--green-soft);
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .detail-card {
+      display: grid;
+      gap: 4px;
+      min-height: 62px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .detail-card.product {
+      grid-column: 1 / -1;
+      min-height: 74px;
+      border-color: rgba(4, 120, 87, 0.18);
+      background: #fbfefd;
+    }
+
+    .detail-card strong {
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .table-strong {
+      font-weight: 900;
+    }
+
+    .product-name {
+      min-width: 260px;
+      line-height: 1.35;
+    }
+
+    .primary-action,
+    .secondary-action,
+    .danger-action,
+    .ghost-action {
+      min-height: 42px;
+      border-radius: 6px;
+      padding: 0 16px;
+      font-weight: 900;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .primary-action {
+      border: 0;
+      color: #fff;
+      background: var(--green);
+    }
+
+    .primary-action:hover {
+      background: var(--green-dark);
+    }
+
+    .secondary-action {
+      color: var(--green-dark);
+      border: 1px solid rgba(4, 120, 87, 0.28);
+      background: var(--green-soft);
+    }
+
+    .ghost-action {
+      color: var(--green-dark);
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .danger-action {
+      color: var(--red);
+      border: 1px solid rgba(194, 65, 50, 0.3);
+      background: var(--red-soft);
+    }
+
+    .toolbar .danger-action {
+      min-height: 44px;
+    }
+
+    .empty-state {
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      padding: 34px;
+      text-align: center;
+      background: #fff;
+    }
+
+    .bottom-bar {
+      position: fixed;
+      z-index: 40;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 -10px 28px rgba(23, 33, 47, 0.12);
+    }
+
+    .bottom-bar-inner {
+      max-width: 1420px;
+      min-height: 76px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .footer-selected-count {
+      display: grid;
+      gap: 5px;
+      color: var(--green-dark);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .footer-selected-count strong {
+      color: var(--ink);
+      font-size: 16px;
+      text-transform: none;
+    }
+
+    .bottom-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    dialog {
+      border: 0;
+      padding: 0;
+      background: transparent;
+    }
+
+    dialog::backdrop {
+      background: rgba(17, 24, 39, 0.48);
+    }
+
+    .modal-panel {
+      width: min(520px, calc(100vw - 32px));
+      overflow: hidden;
+    }
+
+    .modal-panel.small {
+      width: min(440px, calc(100vw - 32px));
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+      padding: 18px 22px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .modal-body {
+      display: grid;
+      gap: 12px;
+      background: #f8fafc;
+    }
+
+    .warning-icon {
+      width: 70px;
+      height: 70px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 12px;
+      border: 3px solid #ffb982;
+      border-radius: 999px;
+      color: #ff9d57;
+      font-size: 42px;
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    .confirm-message {
+      text-align: center;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      border-top: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .icon-close {
+      width: 36px;
+      height: 36px;
+      flex: 0 0 auto;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: #fff;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .quantity-stepper {
+      display: grid;
+      grid-template-columns: 44px minmax(64px, 1fr) 44px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .quantity-stepper button {
+      min-height: 46px;
+      border: 0;
+      color: var(--green-dark);
+      background: var(--green-soft);
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .quantity-stepper input {
+      min-height: 46px;
+      border: 0;
+      border-radius: 0;
+      text-align: center;
+      font-weight: 900;
+    }
+
+    .toast-region {
+      position: fixed;
+      z-index: 90;
+      top: 18px;
+      right: 18px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .toast {
+      width: min(360px, calc(100vw - 36px));
+      border-left: 4px solid var(--green);
+      border-radius: 8px;
+      padding: 14px 16px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      font-weight: 800;
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        grid-template-columns: 1fr;
+        padding: 14px;
+      }
+
+      .main-nav {
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .main-nav a,
+      .main-nav button {
+        min-height: 36px;
+        border-radius: 8px;
+      }
+
+      .main-nav a.active,
+      .main-nav button.active,
+      .nav-more.active {
+        margin-top: 0;
+      }
+
+      .page-heading,
+      .bottom-bar-inner {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .bottom-actions {
+        justify-content: stretch;
+      }
+
+      .table-footer {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .toolbar,
+      .toolbar-actions {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .modal-footer {
+        flex-direction: column-reverse;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="navigation.css" />
+</head>
+
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="CASCADE home">
+        <img class="brand-logo" src="logo.png" alt="CASCADE Plus" />
+      </a>
+      <nav class="main-nav" aria-label="Primary">
+        <a href="Dashboard.html">Dashboard</a>
+        <a href="index.html">Order Pad</a>
+        <a href="history.html">Order History</a>
+        <a href="report.html">Reports</a>
+        <a href="help.html">Help</a>
+        <div class="nav-more active">
+          <button class="more-toggle" type="button" aria-haspopup="true" aria-expanded="false">More</button>
+          <div class="more-menu" role="menu">
+            <a class="active" href="pending.html" role="menuitem">Pending Order</a>
+            <a href="outofstock.html" role="menuitem">Out Of Stock</a>
+            <a href="settings.html" role="menuitem">Settings</a>
+          </div>
+        </div>
+      </nav>
+      <div class="account-menu">
+        <button class="profile-button" type="button" aria-haspopup="true" aria-expanded="false">HI, DUMMY1</button>
+        <div class="account-dropdown" role="menu">
+          <button class="account-menu-item" type="button" role="menuitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 11.5 12 4l9 7.5"></path>
+              <path d="M5.5 10.5V20h13v-9.5"></path>
+              <path d="M9.5 17h5"></path>
+              <path d="M9 14h2"></path>
+              <path d="M13 14h2"></path>
+            </svg>
+            Reset Password
+          </button>
+          <span class="account-menu-separator" aria-hidden="true"></span>
+          <button class="account-menu-item" type="button" role="menuitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="7.5" cy="16.5" r="3"></circle>
+              <path d="m10 14 7.5-7.5"></path>
+              <path d="m15.5 8.5 2 2"></path>
+              <path d="m18 6 2 2"></path>
+            </svg>
+            Log Out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="page-heading" aria-labelledby="pageTitle">
+        <div class="heading-copy">
+          <h1 id="pageTitle">Pending Orders</h1>
+          <p class="subheading">Manage orders in the pending queue and resubmit.</p>
+        </div>
+      </section>
+
+      <section class="toolbar" aria-label="Search pending orders">
+        <label>
+          <input id="orderSearch" type="search" placeholder="Search by Order ID / Product / PIP Code"
+            autocomplete="off" aria-label="Search orders" />
+        </label>
+        <div class="toolbar-actions">
+          <button class="danger-action" id="deleteSelected" type="button">Delete</button>
+        </div>
+      </section>
+
+      <section class="orders-table-shell" id="ordersGrid" aria-label="Pending order list"></section>
+      <section class="empty-state" id="emptyState" hidden>
+        <h2>No pending orders found</h2>
+        <p>Adjust the search to see more orders.</p>
+      </section>
+      <footer class="site-footer">© 2019-2026 Cascade Plus. All rights reserved. Powered by LuxshTech.</footer>
+    </main>
+  </div>
+
+  <section class="bottom-bar" aria-label="Submit selected orders">
+    <div class="bottom-bar-inner">
+      <div class="footer-selected-count" aria-live="polite">
+        <span>Selected Orders Count</span>
+        <strong id="selectedOrdersCount">0 orders selected</strong>
+      </div>
+      <div class="bottom-actions">
+        <button class="secondary-action" id="downloadXls" type="button">Download XLS</button>
+        <button class="primary-action" id="submitOrders" type="button">Submit Orders</button>
+      </div>
+    </div>
+  </section>
+
+  <dialog id="quantityDialog">
+    <section class="modal-panel small" aria-labelledby="quantityTitle">
+      <header class="modal-header">
+        <div>
+          <p class="eyebrow">Edit Quantity</p>
+          <h2 id="quantityTitle">Update Required Quantity</h2>
+        </div>
+        <button class="icon-close" type="button" data-close-quantity aria-label="Close">&times;</button>
+      </header>
+      <div class="modal-body">
+        <div class="detail-card product">
+          <span class="meta-label">Product</span>
+          <strong id="quantityProduct">Product</strong>
+        </div>
+        <label>
+          <span>Quantity</span>
+          <div class="quantity-stepper">
+            <button id="decreaseQuantity" type="button" aria-label="Decrease quantity">-</button>
+            <input id="quantityInput" type="number" min="1" value="1" />
+            <button id="increaseQuantity" type="button" aria-label="Increase quantity">+</button>
+          </div>
+        </label>
+      </div>
+      <footer class="modal-footer">
+        <button class="ghost-action" type="button" data-close-quantity>Cancel</button>
+        <button class="primary-action" id="saveQuantity" type="button">Save</button>
+      </footer>
+    </section>
+  </dialog>
+
+  <dialog id="deleteDialog">
+    <section class="modal-panel small" aria-labelledby="deleteTitle">
+      <header class="modal-header">
+        <div>
+          <p class="eyebrow" id="deleteEyebrow">Pending Order Action</p>
+          <h2 id="deleteTitle">Are you sure?</h2>
+        </div>
+        <button class="icon-close" type="button" data-close-delete aria-label="Close">&times;</button>
+      </header>
+      <div class="modal-body" id="deleteContent"></div>
+      <footer class="modal-footer">
+        <button class="ghost-action" type="button" data-close-delete>No</button>
+        <button class="primary-action" id="confirmDelete" type="button">Yes</button>
+      </footer>
+    </section>
+  </dialog>
+
+  <div class="toast-region" id="toastRegion" aria-live="polite"></div>
+
+  <script src="account-menu.js"></script>
+  <script>
+    const orders = [
+      { id: "331152", date: "25-06-2026 10:37", pip: "0076147", product: "Daktacort HC cream (15g)", quantity: 6, status: "Pending" },
+      { id: "331818", date: "27-06-2026 15:50", pip: "4229340", product: "Affenid XL 18mg tabs PR (30)", quantity: 1, status: "Pending" },
+      { id: "331921", date: "28-06-2026 09:18", pip: "1078245", product: "Metronidazole 400mg tablets", quantity: 10, status: "Pending" },
+      { id: "332004", date: "28-06-2026 11:22", pip: "8856080", product: "Solifenacin Tabs 5mg 30", quantity: 4, status: "Pending" },
+      { id: "332087", date: "28-06-2026 14:06", pip: "1208073", product: "Pregabalin 75mg caps (56)", quantity: 8, status: "Pending" },
+      { id: "332116", date: "29-06-2026 08:05", pip: "1220250", product: "Rosuvastatin 10mg tabs (28)", quantity: 18, status: "Pending" },
+      { id: "332130", date: "29-06-2026 09:12", pip: "6614812", product: "Thiamine 100mg tabs (100)", quantity: 6, status: "Pending" },
+      { id: "332149", date: "29-06-2026 10:01", pip: "5019906", product: "Lamotrigine 25mg tabs (56)", quantity: 7, status: "Pending" },
+      { id: "332166", date: "29-06-2026 10:34", pip: "7373574", product: "Co-dydramol 10mg/500mg tabs (100)", quantity: 5, status: "Pending" },
+      { id: "332180", date: "29-06-2026 11:14", pip: "5012455", product: "Aciclovir 800mg tabs (35)", quantity: 3, status: "Pending" },
+      { id: "332193", date: "29-06-2026 11:46", pip: "3934270", product: "Epimax Cream (500g)", quantity: 12, status: "Pending" },
+      { id: "332208", date: "29-06-2026 12:21", pip: "4059143", product: "GlucoRX CarePoint Ultra pen needles 100", quantity: 3, status: "Pending" }
+    ];
+
+    const state = {
+      search: "",
+      selectedIds: [],
+      activeOrderId: null,
+      pendingConfirmAction: null,
+      currentPage: 1,
+      pageSize: 10
+    };
+
+    const els = {
+      ordersGrid: document.querySelector("#ordersGrid"),
+      emptyState: document.querySelector("#emptyState"),
+      orderSearch: document.querySelector("#orderSearch"),
+      selectedOrdersCount: document.querySelector("#selectedOrdersCount"),
+      deleteSelected: document.querySelector("#deleteSelected"),
+      quantityDialog: document.querySelector("#quantityDialog"),
+      quantityProduct: document.querySelector("#quantityProduct"),
+      quantityInput: document.querySelector("#quantityInput"),
+      deleteDialog: document.querySelector("#deleteDialog"),
+      deleteEyebrow: document.querySelector("#deleteEyebrow"),
+      deleteTitle: document.querySelector("#deleteTitle"),
+      deleteContent: document.querySelector("#deleteContent"),
+      confirmDelete: document.querySelector("#confirmDelete"),
+      toastRegion: document.querySelector("#toastRegion")
+    };
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      })[char]);
+    }
+
+    function activeOrder() {
+      return orders.find((order) => order.id === state.activeOrderId);
+    }
+
+    function visibleOrders() {
+      const needle = state.search.trim().toLowerCase();
+      return orders.filter((order) => !needle || [
+        order.id,
+        order.date,
+        order.product,
+        order.pip,
+        order.status
+      ].some((value) => value.toLowerCase().includes(needle)));
+    }
+
+    function render() {
+      updatePageState();
+      renderOrders();
+    }
+
+    function updatePageState() {
+      state.selectedIds = state.selectedIds.filter((id) => orders.some((order) => order.id === id));
+      els.selectedOrdersCount.textContent = `${state.selectedIds.length} order${state.selectedIds.length === 1 ? "" : "s"} selected`;
+      els.deleteSelected.disabled = state.selectedIds.length === 0;
+    }
+
+    function renderOrders() {
+      const rows = visibleOrders();
+      const pageCount = Math.max(1, Math.ceil(rows.length / state.pageSize));
+      state.currentPage = Math.min(state.currentPage, pageCount);
+      const start = (state.currentPage - 1) * state.pageSize;
+      const pageRows = rows.slice(start, start + state.pageSize);
+      els.emptyState.hidden = rows.length > 0;
+      const visibleIds = pageRows.map((order) => order.id);
+      const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => state.selectedIds.includes(id));
+      const someVisibleSelected = visibleIds.some((id) => state.selectedIds.includes(id));
+      els.ordersGrid.innerHTML = rows.length
+        ? `
+            <table class="pending-table">
+              <thead>
+                <tr>
+                  <th>
+                    <div class="action-header">
+                      <input class="select-all" type="checkbox" data-select-all-visible ${allVisibleSelected ? "checked" : ""} />
+                      <span>Action</span>
+                    </div>
+                  </th>
+                  <th>Order ID</th>
+                  <th>Date</th>
+                  <th>PIP code</th>
+                  <th>Product</th>
+                  <th>Required Quantity</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${pageRows.map(orderRowTemplate).join("")}
+              </tbody>
+            </table>
+            ${renderTableFooter(rows.length, state.currentPage, pageCount, "orders")}
+          `
+        : "";
+      const selectAll = els.ordersGrid.querySelector("[data-select-all-visible]");
+      if (selectAll) selectAll.indeterminate = someVisibleSelected && !allVisibleSelected;
+    }
+
+    function renderTableFooter(totalCount, currentPage, pageCount, label) {
+      const start = (currentPage - 1) * state.pageSize + 1;
+      const end = Math.min(totalCount, currentPage * state.pageSize);
+      const buttons = Array.from({ length: pageCount }, (_, index) => {
+        const page = index + 1;
+        return `<button class="${page === currentPage ? "active" : ""}" type="button" data-page="${page}" aria-label="Go to page ${page}">${page}</button>`;
+      }).join("");
+      return `
+          <div class="table-footer">
+            <label class="entries-control">
+              <span>Show</span>
+              <select data-page-size aria-label="Rows per page">
+                ${[10, 25, 50, 100].map((size) => `<option value="${size}" ${size === state.pageSize ? "selected" : ""}>${size}</option>`).join("")}
+              </select>
+              <span>entries</span>
+            </label>
+            <span>Showing ${start} to ${end} of ${totalCount} ${label}</span>
+            <nav class="pagination" aria-label="Pagination">
+              <button type="button" data-page="${Math.max(1, currentPage - 1)}" ${currentPage === 1 ? "disabled" : ""} aria-label="Previous page">&lsaquo;</button>
+              ${buttons}
+              <button type="button" data-page="${Math.min(pageCount, currentPage + 1)}" ${currentPage === pageCount ? "disabled" : ""} aria-label="Next page">&rsaquo;</button>
+            </nav>
+          </div>
+        `;
+    }
+
+    function orderRowTemplate(order) {
+      const selected = state.selectedIds.includes(order.id);
+      return `
+          <tr class="${selected ? "selected" : ""}" data-order-id="${order.id}">
+            <td>
+              <div class="action-cell">
+                <input class="row-select" type="checkbox" data-select-order="${order.id}" aria-label="Select order ${order.id}" ${selected ? "checked" : ""} />
+                <button class="edit-icon-button" type="button" data-edit-quantity="${order.id}" aria-label="Edit quantity for order ${order.id}" title="Edit quantity">✎</button>
+              </div>
+            </td>
+            <td>${order.id}</td>
+            <td>${order.date}</td>
+            <td>${order.pip}</td>
+            <td class="product-name">${escapeHtml(order.product)}</td>
+            <td>${order.quantity}</td>
+            <td>${order.status}</td>
+          </tr>
+        `;
+    }
+
+    function openQuantity(orderId) {
+      state.activeOrderId = orderId;
+      const order = activeOrder();
+      if (!order) return;
+      els.quantityProduct.textContent = order.product;
+      els.quantityInput.value = order.quantity;
+      els.quantityDialog.showModal();
+    }
+
+    function stepQuantity(amount) {
+      els.quantityInput.value = Math.max(1, Number(els.quantityInput.value || 1) + amount);
+    }
+
+    function saveQuantity() {
+      const order = activeOrder();
+      if (!order) return;
+      order.quantity = Math.max(1, Number(els.quantityInput.value || 1));
+      els.quantityDialog.close();
+      render();
+      toast(`Quantity updated for Order #${order.id}`);
+    }
+
+    function openDeleteSelected() {
+      if (!state.selectedIds.length) {
+        toast("Select at least one pending order to delete");
+        return;
+      }
+      const count = state.selectedIds.length;
+      openConfirmation({
+        eyebrow: "Delete Pending Orders",
+        message: `You want to delete ${count} selected order${count === 1 ? "" : "s"}?`,
+        confirmClass: "danger-action",
+        onConfirm: deleteSelectedOrders
+      });
+    }
+
+    function openConfirmation({ eyebrow, message, confirmClass = "primary-action", onConfirm }) {
+      state.pendingConfirmAction = onConfirm;
+      els.deleteEyebrow.textContent = eyebrow;
+      els.deleteTitle.textContent = "Are you sure?";
+      els.confirmDelete.className = confirmClass;
+      els.confirmDelete.textContent = "Yes";
+      els.deleteContent.innerHTML = `
+          <div class="warning-icon" aria-hidden="true">!</div>
+          <p class="subheading confirm-message">${escapeHtml(message)}</p>
+        `;
+      els.deleteDialog.showModal();
+    }
+
+    function deleteSelectedOrders() {
+      const selected = [...state.selectedIds];
+      for (const id of selected) {
+        const index = orders.findIndex((item) => item.id === id);
+        if (index > -1) orders.splice(index, 1);
+      }
+      state.selectedIds = [];
+      render();
+      toast(`${selected.length} order${selected.length === 1 ? "" : "s"} deleted`);
+    }
+
+    function confirmPendingAction() {
+      els.deleteDialog.close();
+      if (typeof state.pendingConfirmAction === "function") {
+        const action = state.pendingConfirmAction;
+        state.pendingConfirmAction = null;
+        action();
+      }
+    }
+
+    function toggleSelected(orderId, checked) {
+      state.selectedIds = checked
+        ? Array.from(new Set([...state.selectedIds, orderId]))
+        : state.selectedIds.filter((id) => id !== orderId);
+      render();
+    }
+
+    function selectVisible() {
+      const visibleIds = visibleOrders().map((order) => order.id);
+      const allSelected = visibleIds.length > 0 && visibleIds.every((id) => state.selectedIds.includes(id));
+      state.selectedIds = allSelected
+        ? state.selectedIds.filter((id) => !visibleIds.includes(id))
+        : Array.from(new Set([...state.selectedIds, ...visibleIds]));
+      render();
+    }
+
+    function requestSubmitSelected() {
+      if (!state.selectedIds.length) {
+        toast("Select at least one pending order first");
+        return;
+      }
+      const count = state.selectedIds.length;
+      openConfirmation({
+        eyebrow: "Submit Pending Orders",
+        message: `You want to submit ${count} selected order${count === 1 ? "" : "s"}?`,
+        onConfirm: submitSelected
+      });
+    }
+
+    function submitSelected() {
+      const count = state.selectedIds.length;
+      for (const id of [...state.selectedIds]) {
+        const index = orders.findIndex((order) => order.id === id);
+        if (index > -1) orders.splice(index, 1);
+      }
+      state.selectedIds = [];
+      render();
+      toast(`${count} order${count === 1 ? "" : "s"} submitted`);
+    }
+
+    function toast(message) {
+      const node = document.createElement("div");
+      node.className = "toast";
+      node.textContent = message;
+      els.toastRegion.appendChild(node);
+      window.setTimeout(() => {
+        node.style.opacity = "0";
+        node.style.transform = "translateY(-8px)";
+        window.setTimeout(() => node.remove(), 180);
+      }, 2600);
+    }
+
+    els.orderSearch.addEventListener("input", (event) => {
+      state.search = event.target.value;
+      state.currentPage = 1;
+      render();
+    });
+
+    els.ordersGrid.addEventListener("click", (event) => {
+      const pageButton = event.target.closest("[data-page]");
+      if (pageButton) {
+        state.currentPage = Number(pageButton.dataset.page);
+        renderOrders();
+        return;
+      }
+
+      const editQuantity = event.target.closest("[data-edit-quantity]");
+      if (editQuantity) {
+        openQuantity(editQuantity.dataset.editQuantity);
+      }
+    });
+
+    els.ordersGrid.addEventListener("change", (event) => {
+      if (event.target.matches("[data-select-order]")) {
+        toggleSelected(event.target.dataset.selectOrder, event.target.checked);
+      }
+
+      if (event.target.matches("[data-select-all-visible]")) {
+        selectVisible();
+      }
+
+      if (event.target.matches("[data-page-size]")) {
+        state.pageSize = Number(event.target.value);
+        state.currentPage = 1;
+        renderOrders();
+      }
+    });
+
+    document.querySelector("#decreaseQuantity").addEventListener("click", () => stepQuantity(-1));
+    document.querySelector("#increaseQuantity").addEventListener("click", () => stepQuantity(1));
+    document.querySelector("#saveQuantity").addEventListener("click", saveQuantity);
+    document.querySelector("#confirmDelete").addEventListener("click", confirmPendingAction);
+    document.querySelector("#deleteSelected").addEventListener("click", openDeleteSelected);
+    document.querySelector("#downloadXls").addEventListener("click", () => {
+      toast(`${state.selectedIds.length} selected order${state.selectedIds.length === 1 ? "" : "s"} ready for XLS download`);
+    });
+    document.querySelector("#submitOrders").addEventListener("click", requestSubmitSelected);
+
+    document.querySelectorAll("[data-close-quantity]").forEach((button) => {
+      button.addEventListener("click", () => els.quantityDialog.close());
+    });
+
+    document.querySelectorAll("[data-close-delete]").forEach((button) => {
+      button.addEventListener("click", () => {
+        state.pendingConfirmAction = null;
+        els.deleteDialog.close();
+      });
+    });
+
+    render();
+  </script>
+</body>
+
+</html>

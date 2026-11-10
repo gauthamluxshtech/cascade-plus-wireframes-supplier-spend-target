@@ -1,0 +1,1577 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CASCADE Out Of Stock</title>
+  <style>
+    :root {
+      --green: #047857;
+      --green-dark: #065f46;
+      --green-soft: #ecfdf5;
+      --table-header-gradient: linear-gradient(180deg, #d8f3e6 0%, #a9dfc6 100%);
+      --row-alt-gradient: linear-gradient(90deg, #ffffff 0%, #f7fbff 100%);
+      --row-active-gradient: linear-gradient(90deg, #f7fffb 0%, #e4faef 100%);
+      --ink: #17212f;
+      --muted: #667085;
+      --line: #d9e0e8;
+      --soft: #f6f8fa;
+      --app-bg: #f6f8f7;
+      --panel: #ffffff;
+      --red: #c24132;
+      --red-soft: #fff1f0;
+      --shadow: 0 18px 44px rgba(23, 33, 47, 0.14);
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background: var(--app-bg);
+      background-attachment: fixed;
+      background-size: cover;
+  background-position: center bottom;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      padding-bottom: 96px;
+    }
+
+    .topbar {
+      min-height: 64px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 22px;
+      padding: 0 24px;
+      color: #fff;
+      background: #111827;
+      box-shadow: 0 2px 8px rgba(6, 95, 70, 0.2);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .brand-logo {
+      width: auto;
+      height: 48px;
+      max-width: 124px;
+      object-fit: contain;
+    }
+
+    .main-nav {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      align-self: stretch;
+      overflow: visible;
+    }
+
+    .main-nav a,
+    .main-nav button,
+    .profile-button {
+      min-height: 44px;
+      border: 0;
+      border-radius: 8px 8px 0 0;
+      padding: 0 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 800;
+      text-decoration: none;
+      text-transform: uppercase;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .main-nav a.active,
+    .main-nav a:hover,
+    .main-nav button.active,
+    .main-nav button:hover,
+    .nav-more.active>.more-toggle,
+    .nav-more:hover>.more-toggle,
+    .nav-more:focus-within>.more-toggle {
+      color: var(--green);
+      background: #fff;
+    }
+
+    .main-nav a.active,
+    .main-nav button.active,
+    .nav-more.active {
+      position: relative;
+      margin-top: 12px;
+    }
+
+    .nav-more {
+      position: relative;
+      display: inline-flex;
+      align-items: flex-end;
+    }
+
+    .more-toggle {
+      gap: 8px;
+    }
+
+    .more-toggle::after {
+      content: "";
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 5px solid currentColor;
+    }
+
+    .more-menu {
+      position: absolute;
+      top: calc(100% - 1px);
+      left: 0;
+      z-index: 30;
+      min-width: 178px;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px;
+      border-radius: 0 0 8px 8px;
+      background: #fff;
+      box-shadow: 0 16px 34px rgba(15, 23, 42, 0.2);
+    }
+
+    .nav-more:hover .more-menu,
+    .nav-more:focus-within .more-menu {
+      display: flex;
+    }
+
+    .main-nav .more-menu a {
+      position: static;
+      min-height: 38px;
+      border-radius: 6px;
+      margin-top: 0;
+      padding: 0 12px;
+      color: var(--ink);
+      background: transparent;
+    }
+
+    .main-nav .more-menu a:hover,
+    .main-nav .more-menu a:focus-visible,
+    .main-nav .more-menu a.active {
+      color: #fff;
+      background: var(--green);
+    }
+
+    .profile-button {
+      min-height: 36px;
+      gap: 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .profile-button::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-right: 1.5px solid currentColor;
+      border-bottom: 1.5px solid currentColor;
+      transform: translateY(-2px) rotate(45deg);
+    }
+
+    .account-menu {
+      position: relative;
+      justify-self: end;
+    }
+
+    .account-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 60;
+      width: min(232px, calc(100vw - 24px));
+      display: none;
+      flex-direction: column;
+      padding: 8px 0;
+      border-radius: 8px;
+      color: rgba(255, 255, 255, 0.9);
+      background: #0f1726;
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.28);
+    }
+
+    .account-menu.is-open .account-dropdown {
+      display: flex;
+    }
+
+    .account-dropdown::before {
+      content: "";
+      position: absolute;
+      top: -9px;
+      right: 18px;
+      width: 18px;
+      height: 18px;
+      background: #0f1726;
+      border-radius: 3px 0 0 0;
+      transform: rotate(45deg);
+    }
+
+    .account-menu-item {
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border: 0;
+      padding: 0 16px;
+      color: rgba(255, 255, 255, 0.86);
+      background: transparent;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    .account-menu-item:hover,
+    .account-menu-item:focus-visible {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+      outline: 0;
+    }
+
+    .account-menu-item svg {
+      width: 22px;
+      height: 22px;
+      flex: 0 0 auto;
+      stroke: currentColor;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    .account-menu-separator {
+      height: 1px;
+      margin: 8px 0;
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .workspace {
+      max-width: 1420px;
+      margin: 0 auto;
+      padding: 24px 20px 40px;
+    }
+
+    .site-footer {
+      margin-top: 22px;
+      border-top: 1px solid rgba(217, 224, 232, 0.9);
+      padding: 22px 0 2px;
+      color: #7a879a;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .page-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .heading-copy {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    h1,
+    h2,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 0;
+      font-size: 30px;
+      line-height: 1.12;
+    }
+
+    h2 {
+      margin-bottom: 0;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    .eyebrow {
+      margin: 0 0 5px;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .subheading {
+      margin: 0;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .toolbar,
+    .orders-table-shell {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 8px 22px rgba(23, 33, 47, 0.07);
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(330px, 1fr) minmax(330px, 1fr) minmax(420px, 1.15fr) auto;
+      gap: 22px;
+      align-items: end;
+      margin-bottom: 18px;
+      padding: 16px;
+      border-top: 4px solid var(--green);
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+    }
+
+    .toolbar label {
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 16px;
+    }
+
+    label span,
+    .meta-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: rgba(4, 120, 87, 0.65);
+      box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.12);
+    }
+
+    input[type="date"] {
+      cursor: pointer;
+    }
+
+    .toolbar input,
+    .toolbar select {
+      min-height: 44px;
+    }
+
+    .icon-button {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 6px;
+      color: #fff;
+      background: var(--green);
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .icon-button.reset {
+      color: var(--green-dark);
+      border: 1px solid rgba(4, 120, 87, 0.28);
+      background: var(--green-soft);
+      font-size: 0;
+    }
+
+    .icon-button svg {
+      width: 21px;
+      height: 21px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .orders-table-shell {
+      overflow-x: auto;
+    }
+
+    .stock-table {
+      width: 100%;
+      min-width: 1220px;
+      border-collapse: collapse;
+    }
+
+    .stock-table th,
+    .stock-table td {
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .stock-table th {
+      padding: 9px 12px;
+      color: #000;
+      background: var(--table-header-gradient);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .stock-table tbody tr {
+      height: 40px;
+      background: #fff;
+    }
+
+    .stock-table tbody tr:nth-child(odd) {
+      background: var(--row-alt-gradient);
+    }
+
+    .stock-table td {
+      padding: 5px 12px;
+    }
+
+    .stock-table tbody tr:hover,
+    .stock-table tbody tr.selected {
+      background: var(--row-active-gradient);
+    }
+
+    .stock-table tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .select-col {
+      width: 44px;
+    }
+
+    .row-select,
+    .select-all {
+      width: 18px;
+      height: 18px;
+      min-height: 18px;
+      margin: 0;
+      padding: 0;
+      accent-color: var(--green);
+    }
+
+    /* Req. Qty column is sized for the edit state so editing never shifts the layout */
+    .qty-col {
+      width: 170px;
+      white-space: nowrap;
+    }
+
+    .qty-display,
+    .qty-editor {
+      height: 30px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .edit-icon-button {
+      width: 20px;
+      height: 20px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 4px;
+      padding: 0;
+      color: var(--green-dark);
+      background: transparent;
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .edit-icon-button:hover,
+    .edit-icon-button:focus-visible {
+      background: var(--green-soft);
+      outline: 0;
+    }
+
+    .qty-editor input {
+      width: 64px;
+      min-height: 30px;
+      height: 30px;
+      padding: 0 6px;
+      text-align: center;
+      font-weight: 700;
+      -moz-appearance: textfield;
+    }
+
+    .qty-editor input::-webkit-outer-spin-button,
+    .qty-editor input::-webkit-inner-spin-button {
+      margin: 0;
+      -webkit-appearance: none;
+    }
+
+    .qty-editor input.invalid {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(194, 65, 50, 0.12);
+    }
+
+    .qty-save,
+    .qty-cancel {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 6px;
+      padding: 0;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .qty-save {
+      background: var(--green);
+    }
+
+    .qty-cancel {
+      background: var(--red);
+    }
+
+    .last-order-time {
+      white-space: nowrap;
+    }
+
+    .last-order-supplier {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .th-with-info {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-tip {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .info-icon {
+      width: 14px;
+      height: 14px;
+      display: grid;
+      place-items: center;
+      border: 1.5px solid currentColor;
+      border-radius: 999px;
+      padding: 0;
+      color: #344054;
+      background: transparent;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 9px;
+      font-weight: 900;
+      line-height: 1;
+      cursor: help;
+    }
+
+    .info-icon:focus-visible {
+      outline: 2px solid var(--green);
+      outline-offset: 2px;
+    }
+
+    .info-tooltip {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      z-index: 20;
+      width: 240px;
+      display: none;
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: #fff;
+      background: #17212f;
+      box-shadow: 0 8px 20px rgba(23, 33, 47, 0.2);
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.4;
+      text-transform: none;
+      white-space: normal;
+      transform: translateX(-50%);
+    }
+
+    .info-tip:hover .info-tooltip,
+    .info-icon:focus-visible + .info-tooltip {
+      display: block;
+    }
+
+    .table-strong {
+      font-weight: 900;
+    }
+
+    .product-name {
+      min-width: 300px;
+      line-height: 1.35;
+    }
+
+    .status-pill {
+      min-height: 30px;
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0 11px;
+      color: var(--green-dark);
+      background: var(--green-soft);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .table-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 14px;
+      background: #fff;
+      font-size: 15px;
+    }
+
+    .entries-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .entries-control span {
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 500;
+      text-transform: none;
+    }
+
+    .entries-control select {
+      width: auto;
+      min-height: 28px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0 24px 0 6px;
+      color: var(--ink);
+      background: #fff;
+      font-size: 13px;
+    }
+
+    .pagination {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pagination button {
+      min-width: 34px;
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--ink);
+      background: #fff;
+      font-weight: 900;
+    }
+
+    .pagination button.active {
+      border-color: var(--green);
+      color: #fff;
+      background: var(--green);
+    }
+
+    .primary-action,
+    .danger-action {
+      min-height: 42px;
+      border: 0;
+      border-radius: 6px;
+      padding: 0 28px;
+      color: #fff;
+      font-weight: 900;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .primary-action {
+      background: var(--green);
+    }
+
+    .danger-action {
+      background: var(--red);
+    }
+
+    .bottom-bar {
+      position: fixed;
+      z-index: 40;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 -10px 28px rgba(23, 33, 47, 0.12);
+    }
+
+    .bottom-bar-inner {
+      max-width: 1420px;
+      min-height: 76px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .footer-selected-count {
+      display: grid;
+      gap: 5px;
+      color: var(--green-dark);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .footer-selected-count strong {
+      color: var(--ink);
+      font-size: 16px;
+      text-transform: none;
+    }
+
+    .bottom-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .empty-state {
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      padding: 34px;
+      text-align: center;
+      background: #fff;
+    }
+
+    .toast-region {
+      position: fixed;
+      z-index: 90;
+      top: 18px;
+      right: 18px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .toast {
+      width: min(360px, calc(100vw - 36px));
+      border-left: 4px solid var(--green);
+      border-radius: 8px;
+      padding: 14px 16px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      font-weight: 800;
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    dialog {
+      border: 0;
+      padding: 0;
+      background: transparent;
+    }
+
+    dialog::backdrop {
+      background: rgba(17, 24, 39, 0.48);
+    }
+
+    .modal-panel {
+      width: min(440px, calc(100vw - 32px));
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+      padding: 18px 22px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-body {
+      display: grid;
+      gap: 12px;
+      background: #f8fafc;
+      text-align: center;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    .warning-icon {
+      width: 70px;
+      height: 70px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 12px;
+      border: 3px solid #ffb982;
+      border-radius: 999px;
+      color: #ff9d57;
+      font-size: 42px;
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    .secondary-action {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0 28px;
+      color: var(--ink);
+      background: #fff;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .icon-close {
+      width: 36px;
+      height: 36px;
+      flex: 0 0 auto;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: #fff;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    @media (max-width: 860px) {
+      .topbar {
+        grid-template-columns: 1fr;
+        padding: 14px;
+      }
+
+      .main-nav {
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .main-nav a,
+      .main-nav button {
+        min-height: 36px;
+        border-radius: 8px;
+      }
+
+      .main-nav a.active,
+      .main-nav button.active,
+      .nav-more.active {
+        margin-top: 0;
+      }
+
+      .page-heading {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .table-footer {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .toolbar,
+      .toolbar-actions,
+      .bottom-bar-inner {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar label {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+
+      .bottom-actions {
+        justify-content: stretch;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="navigation.css" />
+</head>
+
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="CASCADE home">
+        <img class="brand-logo" src="logo.png" alt="CASCADE Plus" />
+      </a>
+      <nav class="main-nav" aria-label="Primary">
+        <a href="Dashboard.html">Dashboard</a>
+        <a href="index.html">Order Pad</a>
+        <a href="history.html">Order History</a>
+        <a href="report.html">Reports</a>
+        <a href="help.html">Help</a>
+        <div class="nav-more active">
+          <button class="more-toggle" type="button" aria-haspopup="true" aria-expanded="false">More</button>
+          <div class="more-menu" role="menu">
+            <a href="pending.html" role="menuitem">Pending Order</a>
+            <a class="active" href="outofstock.html" role="menuitem">Out Of Stock</a>
+            <a href="settings.html" role="menuitem">Settings</a>
+          </div>
+        </div>
+      </nav>
+      <div class="account-menu">
+        <button class="profile-button" type="button" aria-haspopup="true" aria-expanded="false">HI, DUMMY1</button>
+        <div class="account-dropdown" role="menu">
+          <button class="account-menu-item" type="button" role="menuitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 11.5 12 4l9 7.5"></path>
+              <path d="M5.5 10.5V20h13v-9.5"></path>
+              <path d="M9.5 17h5"></path>
+              <path d="M9 14h2"></path>
+              <path d="M13 14h2"></path>
+            </svg>
+            Reset Password
+          </button>
+          <span class="account-menu-separator" aria-hidden="true"></span>
+          <button class="account-menu-item" type="button" role="menuitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="7.5" cy="16.5" r="3"></circle>
+              <path d="m10 14 7.5-7.5"></path>
+              <path d="m15.5 8.5 2 2"></path>
+              <path d="m18 6 2 2"></path>
+            </svg>
+            Log Out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="page-heading" aria-labelledby="pageTitle">
+        <div class="heading-copy">
+          <h1 id="pageTitle">Out Of Stock</h1>
+          <p class="subheading">Track blocked and out-of-stock lines from previous orders and reorder them.</p>
+        </div>
+      </section>
+
+      <section class="toolbar" aria-label="Filter out of stock lines">
+        <label>
+          <span>Start</span>
+          <input id="startDate" type="date" value="2026-07-01" lang="en-GB" />
+        </label>
+        <label>
+          <span>End</span>
+          <input id="endDate" type="date" value="2026-07-01" lang="en-GB" />
+        </label>
+        <label>
+          <span>Product</span>
+          <input id="productFilter" type="search" placeholder="Search product" autocomplete="off" />
+        </label>
+        <div class="toolbar-actions">
+          <button class="icon-button" id="searchButton" type="button" aria-label="Search" title="Search">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"></circle>
+              <path d="m16.5 16.5 4 4"></path>
+            </svg>
+          </button>
+          <button class="icon-button reset" id="resetFilters" type="button" aria-label="Reset filters"
+            title="Reset filters">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 12a9 9 0 1 0 3-6.7"></path>
+              <path d="M3 4v5h5"></path>
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <section class="orders-table-shell" id="stockGrid" aria-label="Out of stock line list"></section>
+      <section class="empty-state" id="emptyState" hidden>
+        <h2>No out of stock lines found</h2>
+        <p>Adjust the filter to see more lines.</p>
+      </section>
+      <footer class="site-footer">© 2019-2026 Cascade Plus. All rights reserved. Powered by LuxshTech.</footer>
+    </main>
+  </div>
+
+  <section class="bottom-bar" aria-label="Out of stock actions">
+    <div class="bottom-bar-inner">
+      <div class="footer-selected-count" aria-live="polite">
+        <span>Selected Lines Count</span>
+        <strong id="selectedLinesCount">0 lines selected</strong>
+      </div>
+      <div class="bottom-actions">
+        <button class="primary-action" id="addToOrder" type="button">Add To Order</button>
+        <button class="danger-action" id="clearAll" type="button">Clear All</button>
+      </div>
+    </div>
+  </section>
+
+  <dialog id="clearAllDialog">
+    <section class="modal-panel" aria-labelledby="clearAllTitle">
+      <header class="modal-header">
+        <div>
+          <p class="eyebrow">Clear Out Of Stock</p>
+          <h2 id="clearAllTitle">Are you sure?</h2>
+        </div>
+      </header>
+      <div class="modal-body">
+        <div class="warning-icon" aria-hidden="true">!</div>
+        <p class="subheading">This will clear all items from the Out Of Stock screen.</p>
+      </div>
+      <footer class="modal-footer">
+        <button class="secondary-action" data-close-clear-all type="button">No</button>
+        <button class="danger-action" id="confirmClearAll" type="button">Yes</button>
+      </footer>
+    </section>
+  </dialog>
+
+  <div class="toast-region" id="toastRegion" aria-live="polite"></div>
+
+  <script src="account-menu.js"></script>
+  <script>
+    // Raw PIP / supplier-response records as returned for each ordered line.
+    const stockRecords = [
+      { lineId: "332624-1213313", orderId: "332624", date: "01-07-2026 - 12:04:18", pip: "1213313", product: "Brancico XL 50mg tabs (60)", requested: 2, received: 0, status: "Out of Stock" },
+      { lineId: "332613-1172659", orderId: "332613", date: "01-07-2026 - 11:34:55", pip: "1172659", product: "Candesartan 8mg tabs (28)", requested: 6, received: 0, status: "Out of Stock" },
+      { lineId: "332613-1206135", orderId: "332613", date: "01-07-2026 - 11:34:55", pip: "1206135", product: "Candesartan 8mg tabs (28)", requested: 6, received: 0, status: "Out of Stock" },
+      { lineId: "332613-1264050", orderId: "332613", date: "01-07-2026 - 11:34:55", pip: "1264050", product: "Rosuvastatin 15mg tabs f/c (28)", requested: 1, received: 0, status: "Out of Stock" },
+      { lineId: "332613-2645083", orderId: "332613", date: "01-07-2026 - 11:34:55", pip: "2645083", product: "Movicol lemon+lime SF 13.8g sachets (30)", requested: 6, received: 0, status: "Out of Stock" },
+      { lineId: "332613-3091006", orderId: "332613", date: "01-07-2026 - 11:34:55", pip: "3091006", product: "Octenisan wash lotion (450ml)", requested: 1, received: 0, status: "Out of Stock" },
+      { lineId: "332601-1113869", orderId: "332601", date: "01-07-2026 - 11:18:49", pip: "1113869", product: "Loratadine 5mg/5ml oral soln (100ml)", requested: 2, received: 0, status: "Out of Stock" },
+      { lineId: "332601-1133255", orderId: "332601", date: "01-07-2026 - 11:18:49", pip: "1133255", product: "Loratadine 5mg/5ml oral soln (100ml)", requested: 2, received: 0, status: "Out of Stock" },
+      { lineId: "332601-3127081", orderId: "332601", date: "01-07-2026 - 11:18:49", pip: "3127081", product: "Estradot patches 75mcg (8)", requested: 3, received: 0, status: "Out of Stock" },
+      { lineId: "332601-3671013", orderId: "332601", date: "01-07-2026 - 11:18:49", pip: "3671013", product: "Advazorb dressing 12.5cmx12.5cm", requested: 1, received: 0, status: "Out of Stock" },
+      { lineId: "332601-5019518", orderId: "332601", date: "01-07-2026 - 11:18:17", pip: "5019518", product: "Mirtazapine 45mg tabs (28)", requested: 0, received: 0, status: "Above Drug Tariff" },
+      { lineId: "332601-1135383", orderId: "332601", date: "01-07-2026 - 11:18:17", pip: "1135383", product: "Mirtazapine 45mg tabs (28)", requested: 0, received: 0, status: "Above Drug Tariff" },
+      { lineId: "332601-1153006", orderId: "332601", date: "01-07-2026 - 11:18:17", pip: "1153006", product: "Mirtazapine 45mg tabs (28)", requested: 0, received: 0, status: "Above Drug Tariff" },
+      { lineId: "332601-2823557", orderId: "332601", date: "01-07-2026 - 11:18:17", pip: "2823557", product: "Canesten Combi 500mg/2%", requested: 0, received: 0, status: "Above Drug Tariff" },
+      { lineId: "332601-8561144", orderId: "332601", date: "01-07-2026 - 11:18:17", pip: "8561144", product: "Pregabalin 150mg caps (56)", requested: 0, received: 0, status: "Above Drug Tariff" },
+      { lineId: "332601-3831146-a", orderId: "332601", date: "01-07-2026 - 11:18:17", pip: "3831146", product: "Ensure Compact Liquid banana (4x125ml) (500ml)", requested: 0, received: 0, status: "Above Drug Tariff" },
+      { lineId: "332601-3831146-b", orderId: "332601", date: "01-07-2026 - 11:18:17", pip: "3831146", product: "Ensure Compact Liquid banana (4x125ml) (500ml)", requested: 0, received: 0, status: "Above Drug Tariff" },
+      { lineId: "332601-3831146-c", orderId: "332601", date: "01-07-2026 - 11:18:17", pip: "3831146", product: "Ensure Compact Liquid banana (4x125ml) (500ml)", requested: 0, received: 0, status: "Above Drug Tariff" },
+      { lineId: "332601-3744646-a", orderId: "332601", date: "01-07-2026 - 11:18:17", pip: "3744646", product: "Advazorb Heel dress no adh bord 17cmx21cm", requested: 0, received: 0, status: "Above Drug Tariff" },
+      { lineId: "332601-3744646-b", orderId: "332601", date: "01-07-2026 - 11:18:17", pip: "3744646", product: "Advazorb Heel dress no adh bord 17cmx21cm", requested: 0, received: 0, status: "Above Drug Tariff" }
+    ];
+
+    // Live order history across all Cascade Plus customers, used for Last Successful Order.
+    const orderHistory = [
+      { orderId: "332641", product: "Brancico XL 50mg tabs (60)", supplier: "Lexon", status: "Successful", orderedAt: "2026-07-01T12:32:18" },
+      { orderId: "332598", product: "Candesartan 8mg tabs (28)", supplier: "AAH", status: "Successful", orderedAt: "2026-07-01T11:12:04" },
+      { orderId: "332655", product: "Candesartan 8mg tabs (28)", supplier: "Alliance", status: "Successful", orderedAt: "2026-07-01T14:05:41" },
+      { orderId: "332671", product: "Candesartan 8mg tabs (28)", supplier: "Phoenix", status: "Out of Stock", orderedAt: "2026-07-01T15:20:00" },
+      { orderId: "332648", product: "Movicol lemon+lime SF 13.8g sachets (30)", supplier: "Phoenix", status: "Successful", orderedAt: "2026-07-01T13:47:09" },
+      { orderId: "332680", product: "Movicol lemon+lime SF 13.8g sachets (30)", supplier: "B&S Distribution", status: "Successful", orderedAt: "2026-07-01T16:21:33" },
+      { orderId: "332662", product: "Octenisan wash lotion (450ml)", supplier: "AAH", status: "Out of Stock", orderedAt: "2026-07-01T14:40:12" },
+      { orderId: "332684", product: "Loratadine 5mg/5ml oral soln (100ml)", supplier: "AAH", status: "Successful", orderedAt: "2026-07-01T16:42:31" },
+      { orderId: "332610", product: "Advazorb dressing 12.5cmx12.5cm", supplier: "OTC Direct", status: "Successful", orderedAt: "2026-07-01T11:58:02" }
+    ];
+
+    // One logical row per Order ID + product, however many PIP / supplier-response records exist.
+    function toLogicalLines(records) {
+      const lines = new Map();
+      records.forEach((record) => {
+        const key = `${record.orderId}|${record.product}`;
+        if (!lines.has(key)) {
+          lines.set(key, {
+            lineId: `${record.orderId}-${lines.size + 1}`,
+            orderId: record.orderId,
+            date: record.date,
+            product: record.product,
+            requested: record.requested
+          });
+        }
+      });
+      return Array.from(lines.values());
+    }
+
+    // Only out-of-stock items are shown; "Blocked as price above drug tariff" lines are excluded.
+    let stockLines = toLogicalLines(stockRecords.filter((record) => record.status === "Out of Stock"));
+
+    const state = {
+      selectedIds: [],
+      editingLineId: null,
+      editDraft: "",
+      currentPage: 1,
+      pageSize: 10
+    };
+    const defaultFilters = {
+      startDate: "2026-07-01",
+      endDate: "2026-07-01",
+      product: ""
+    };
+
+    const els = {
+      stockGrid: document.querySelector("#stockGrid"),
+      emptyState: document.querySelector("#emptyState"),
+      startDate: document.querySelector("#startDate"),
+      endDate: document.querySelector("#endDate"),
+      productFilter: document.querySelector("#productFilter"),
+      selectedLinesCount: document.querySelector("#selectedLinesCount"),
+      clearAllDialog: document.querySelector("#clearAllDialog"),
+      confirmClearAll: document.querySelector("#confirmClearAll"),
+      toastRegion: document.querySelector("#toastRegion")
+    };
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      })[char]);
+    }
+
+    function visibleLines() {
+      const startDate = parseDateInput(els.startDate.value);
+      const endDate = parseDateInput(els.endDate.value);
+      const productQuery = els.productFilter.value.trim().toLowerCase();
+      // Filtering runs on the complete dataset before pagination, so matches on later pages are found.
+      return stockLines.filter((line) => {
+        const lineDate = parseStockLineDate(line.date);
+        const productPasses = !productQuery || line.product.toLowerCase().includes(productQuery);
+        const startPasses = !startDate || !lineDate || lineDate >= startDate;
+        const endPasses = !endDate || !lineDate || lineDate <= endDate;
+        return productPasses && startPasses && endPasses;
+      });
+    }
+
+    function parseDateInput(value) {
+      if (!value) return null;
+      const [year, month, day] = value.split("-").map(Number);
+      if (!year || !month || !day) return null;
+      return new Date(year, month - 1, day);
+    }
+
+    function parseStockLineDate(value) {
+      const [day, month, year] = String(value || "").split(" - ")[0].split("-").map(Number);
+      if (!year || !month || !day) return null;
+      return new Date(year, month - 1, day);
+    }
+
+    function parseStockLineDateTime(value) {
+      const [datePart, timePart = ""] = String(value || "").split(" - ");
+      const [day, month, year] = datePart.split("-").map(Number);
+      const [hours, minutes, seconds] = timePart.split(":").map(Number);
+      if (!year || !month || !day) return null;
+      return new Date(year, month - 1, day, hours || 0, minutes || 0, seconds || 0);
+    }
+
+    function formatOrderTimestamp(value) {
+      const date = new Date(value);
+      const pad = (number) => String(number).padStart(2, "0");
+      return `${pad(date.getDate())}-${pad(date.getMonth() + 1)}-${date.getFullYear()} - ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+    }
+
+    // Latest successful order for the same product, by any user and any supplier,
+    // placed after the exception order and not later than now.
+    function lastSuccessfulOrder(line) {
+      const exceptionTime = parseStockLineDateTime(line.date);
+      const now = new Date();
+      return orderHistory
+        .filter((order) => {
+          const orderedAt = new Date(order.orderedAt);
+          return order.status === "Successful"
+            && order.product === line.product
+            && (!exceptionTime || orderedAt > exceptionTime)
+            && orderedAt <= now;
+        })
+        .sort((a, b) => new Date(b.orderedAt) - new Date(a.orderedAt))[0] || null;
+    }
+
+    function render() {
+      const rows = visibleLines();
+      const total = rows.length;
+      if (state.editingLineId && !rows.some((line) => line.lineId === state.editingLineId)) {
+        state.editingLineId = null;
+      }
+      state.selectedIds = state.selectedIds.filter((id) => rows.some((line) => line.lineId === id));
+      els.selectedLinesCount.textContent = `${state.selectedIds.length} line${state.selectedIds.length === 1 ? "" : "s"} selected`;
+      renderTable(rows);
+    }
+
+    function renderTable(rows) {
+      const pageCount = Math.max(1, Math.ceil(rows.length / state.pageSize));
+      state.currentPage = Math.min(state.currentPage, pageCount);
+      const start = (state.currentPage - 1) * state.pageSize;
+      const pageRows = rows.slice(start, start + state.pageSize);
+      els.emptyState.hidden = rows.length > 0;
+      const visibleIds = pageRows.map((line) => line.lineId);
+      const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => state.selectedIds.includes(id));
+      const someVisibleSelected = visibleIds.some((id) => state.selectedIds.includes(id));
+      els.stockGrid.innerHTML = rows.length
+        ? `
+            <table class="stock-table">
+              <thead>
+                <tr>
+                  <th class="select-col">
+                    <input class="select-all" type="checkbox" data-select-all-visible aria-label="Select all lines on this page" ${allVisibleSelected ? "checked" : ""} />
+                  </th>
+                  <th>Order ID</th>
+                  <th>Date</th>
+                  <th>Product</th>
+                  <th class="qty-col">Req. Qty</th>
+                  <th>
+                    <span class="th-with-info">
+                      Last Successful Order
+                      <span class="info-tip">
+                        <button class="info-icon" type="button" aria-label="About Last Successful Order" aria-describedby="lastOrderTip">I</button>
+                        <span class="info-tooltip" id="lastOrderTip" role="tooltip">Recently ordered elsewhere from this supplier. Stock availability not guaranteed</span>
+                      </span>
+                    </span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                ${pageRows.map(stockRowTemplate).join("")}
+              </tbody>
+            </table>
+            ${renderTableFooter(rows.length, state.currentPage, pageCount, "lines")}
+          `
+        : "";
+      const selectAll = els.stockGrid.querySelector("[data-select-all-visible]");
+      if (selectAll) selectAll.indeterminate = someVisibleSelected && !allVisibleSelected;
+    }
+
+    function renderTableFooter(totalCount, currentPage, pageCount, label) {
+      const start = (currentPage - 1) * state.pageSize + 1;
+      const end = Math.min(totalCount, currentPage * state.pageSize);
+      const buttons = Array.from({ length: pageCount }, (_, index) => {
+        const page = index + 1;
+        return `<button class="${page === currentPage ? "active" : ""}" type="button" data-page="${page}" aria-label="Go to page ${page}">${page}</button>`;
+      }).join("");
+      return `
+          <div class="table-footer">
+            <label class="entries-control">
+              <span>Show</span>
+              <select data-page-size aria-label="Rows per page">
+                ${[10, 25, 50, 100].map((size) => `<option value="${size}" ${size === state.pageSize ? "selected" : ""}>${size}</option>`).join("")}
+              </select>
+              <span>entries</span>
+            </label>
+            <span>Showing ${start} to ${end} of ${totalCount} ${label}</span>
+            <nav class="pagination" aria-label="Pagination">
+              <button type="button" data-page="${Math.max(1, currentPage - 1)}" ${currentPage === 1 ? "disabled" : ""} aria-label="Previous page">&lsaquo;</button>
+              ${buttons}
+              <button type="button" data-page="${Math.min(pageCount, currentPage + 1)}" ${currentPage === pageCount ? "disabled" : ""} aria-label="Next page">&rsaquo;</button>
+            </nav>
+          </div>
+        `;
+    }
+
+    function qtyCellTemplate(line) {
+      if (state.editingLineId === line.lineId) {
+        return `
+              <span class="qty-editor">
+                <input type="number" min="1" step="1" inputmode="numeric" value="${escapeHtml(state.editDraft)}" data-qty-input aria-label="Required quantity for ${escapeHtml(line.product)}" />
+                <button class="qty-save" type="button" data-save-qty aria-label="Save quantity" title="Save">&#10003;</button>
+                <button class="qty-cancel" type="button" data-cancel-qty aria-label="Cancel edit" title="Cancel">&#10005;</button>
+              </span>
+            `;
+      }
+      return `
+              <span class="qty-display">
+                <button class="edit-icon-button" type="button" data-edit-line="${line.lineId}" aria-label="Edit quantity for ${escapeHtml(line.product)}" title="Edit">&#9998;</button>
+                <span>${line.requested}</span>
+              </span>
+            `;
+    }
+
+    function lastOrderTemplate(line) {
+      const order = lastSuccessfulOrder(line);
+      if (!order) return "-";
+      return `<span class="last-order-time">${formatOrderTimestamp(order.orderedAt)}</span> <span class="last-order-supplier">by ${escapeHtml(order.supplier)}</span>`;
+    }
+
+    function stockRowTemplate(line) {
+      const selected = state.selectedIds.includes(line.lineId);
+      return `
+          <tr class="${selected ? "selected" : ""}" data-line-id="${line.lineId}">
+            <td class="select-col">
+              <input class="row-select" type="checkbox" data-select-line="${line.lineId}" aria-label="Select ${escapeHtml(line.product)}" ${selected ? "checked" : ""} />
+            </td>
+            <td>${line.orderId}</td>
+            <td>${line.date}</td>
+            <td class="product-name">${escapeHtml(line.product)}</td>
+            <td class="qty-col">${qtyCellTemplate(line)}</td>
+            <td>${lastOrderTemplate(line)}</td>
+          </tr>
+        `;
+    }
+
+    function toggleSelected(lineId, checked) {
+      state.selectedIds = checked
+        ? Array.from(new Set([...state.selectedIds, lineId]))
+        : state.selectedIds.filter((id) => id !== lineId);
+      render();
+    }
+
+    function selectVisible() {
+      const rows = visibleLines();
+      const start = (state.currentPage - 1) * state.pageSize;
+      const visibleIds = rows.slice(start, start + state.pageSize).map((line) => line.lineId);
+      const allSelected = visibleIds.length > 0 && visibleIds.every((id) => state.selectedIds.includes(id));
+      state.selectedIds = allSelected
+        ? state.selectedIds.filter((id) => !visibleIds.includes(id))
+        : Array.from(new Set([...state.selectedIds, ...visibleIds]));
+      render();
+    }
+
+    function toast(message) {
+      const node = document.createElement("div");
+      node.className = "toast";
+      node.textContent = message;
+      els.toastRegion.appendChild(node);
+      window.setTimeout(() => {
+        node.style.opacity = "0";
+        node.style.transform = "translateY(-8px)";
+        window.setTimeout(() => node.remove(), 180);
+      }, 2600);
+    }
+
+    function editingLine() {
+      return stockLines.find((line) => line.lineId === state.editingLineId);
+    }
+
+    function startEdit(lineId) {
+      const line = stockLines.find((item) => item.lineId === lineId);
+      if (!line) return;
+      // Only one row is editable at a time; opening another row discards the previous draft.
+      state.editingLineId = lineId;
+      state.editDraft = String(Math.max(1, Number(line.requested) || 1));
+      render();
+      const input = els.stockGrid.querySelector("[data-qty-input]");
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }
+
+    function saveEdit() {
+      const line = editingLine();
+      if (!line) return;
+      const quantity = Number(state.editDraft);
+      if (!Number.isInteger(quantity) || quantity < 1) {
+        const input = els.stockGrid.querySelector("[data-qty-input]");
+        if (input) {
+          input.classList.add("invalid");
+          input.focus();
+        }
+        toast("Enter a quantity of 1 or more");
+        return;
+      }
+      line.requested = quantity;
+      state.editingLineId = null;
+      render();
+      toast(`Quantity updated for ${line.product}`);
+    }
+
+    function cancelEdit() {
+      state.editingLineId = null;
+      render();
+    }
+
+    function resetFilters() {
+      els.startDate.value = defaultFilters.startDate;
+      els.endDate.value = defaultFilters.endDate;
+      els.productFilter.value = defaultFilters.product;
+      state.editingLineId = null;
+      state.selectedIds = [];
+      state.currentPage = 1;
+      render();
+      toast("Filters reset");
+    }
+
+    function openDatePicker(input) {
+      if (typeof input.showPicker === "function") {
+        try {
+          input.showPicker();
+        } catch (error) {
+          // Some browsers only allow showPicker during direct user activation.
+        }
+      }
+    }
+
+    els.productFilter.addEventListener("input", () => {
+      state.currentPage = 1;
+      render();
+    });
+
+    [els.startDate, els.endDate].forEach((input) => {
+      input.addEventListener("click", () => openDatePicker(input));
+      input.addEventListener("focus", () => openDatePicker(input));
+      input.addEventListener("change", () => {
+        state.selectedIds = [];
+        state.currentPage = 1;
+        render();
+      });
+    });
+
+    document.querySelector("#searchButton").addEventListener("click", () => {
+      state.currentPage = 1;
+      render();
+    });
+    document.querySelector("#resetFilters").addEventListener("click", resetFilters);
+
+    els.stockGrid.addEventListener("click", (event) => {
+      const pageButton = event.target.closest("[data-page]");
+      if (pageButton) {
+        state.currentPage = Number(pageButton.dataset.page);
+        render();
+        return;
+      }
+
+      const editLine = event.target.closest("[data-edit-line]");
+      if (editLine) {
+        startEdit(editLine.dataset.editLine);
+        return;
+      }
+
+      if (event.target.closest("[data-save-qty]")) {
+        saveEdit();
+        return;
+      }
+
+      if (event.target.closest("[data-cancel-qty]")) {
+        cancelEdit();
+      }
+    });
+
+    els.stockGrid.addEventListener("input", (event) => {
+      if (event.target.matches("[data-qty-input]")) {
+        state.editDraft = event.target.value;
+        event.target.classList.remove("invalid");
+      }
+    });
+
+    els.stockGrid.addEventListener("keydown", (event) => {
+      if (!event.target.matches("[data-qty-input]")) return;
+      if (event.key === "Enter") {
+        event.preventDefault();
+        saveEdit();
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        cancelEdit();
+      }
+    });
+
+    els.stockGrid.addEventListener("change", (event) => {
+      if (event.target.matches("[data-select-line]")) {
+        toggleSelected(event.target.dataset.selectLine, event.target.checked);
+      }
+
+      if (event.target.matches("[data-select-all-visible]")) {
+        selectVisible();
+      }
+
+      if (event.target.matches("[data-page-size]")) {
+        state.pageSize = Number(event.target.value);
+        state.currentPage = 1;
+        render();
+      }
+    });
+
+    document.querySelector("#addToOrder").addEventListener("click", () => {
+      toast(`${state.selectedIds.length} selected line${state.selectedIds.length === 1 ? "" : "s"} ready to add`);
+    });
+
+    document.querySelector("#clearAll").addEventListener("click", () => {
+      if (!stockLines.length) {
+        toast("There are no out of stock items to clear");
+        return;
+      }
+      els.clearAllDialog.showModal();
+    });
+
+    els.confirmClearAll.addEventListener("click", () => {
+      const clearedCount = stockLines.length;
+      stockLines = [];
+      state.editingLineId = null;
+      state.selectedIds = [];
+      state.currentPage = 1;
+      els.clearAllDialog.close();
+      render();
+      toast(`${clearedCount} item${clearedCount === 1 ? "" : "s"} cleared`);
+    });
+
+    document.querySelectorAll("[data-close-clear-all]").forEach((button) => {
+      button.addEventListener("click", () => els.clearAllDialog.close());
+    });
+
+    render();
+  </script>
+</body>
+
+</html>

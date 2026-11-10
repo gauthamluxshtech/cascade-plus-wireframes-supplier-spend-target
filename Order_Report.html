@@ -1,0 +1,1281 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CASCADE Order Report</title>
+  <style>
+    :root {
+      --green: #047857;
+      --green-dark: #065f46;
+      --green-soft: #ecfdf5;
+      --ink: #17212f;
+      --muted: #667085;
+      --line: #d9e0e8;
+      --soft: #f6f8fa;
+      --app-bg: #f6f8f7;
+      --panel: #ffffff;
+      --shadow: 0 14px 34px rgba(23, 33, 47, 0.1);
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background: var(--app-bg);
+      background-attachment: fixed;
+      background-size: cover;
+      background-position: center bottom;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+    }
+
+    .topbar {
+      min-height: 64px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 22px;
+      padding: 0 24px;
+      color: #fff;
+      background: #111827;
+      box-shadow: 0 2px 8px rgba(6, 95, 70, 0.2);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .brand-logo {
+      width: auto;
+      height: 48px;
+      max-width: 124px;
+      object-fit: contain;
+    }
+
+    .main-nav {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      align-self: stretch;
+      overflow: visible;
+    }
+
+    .main-nav a,
+    .main-nav button,
+    .profile-button {
+      min-height: 44px;
+      border: 0;
+      border-radius: 8px 8px 0 0;
+      padding: 0 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      text-transform: uppercase;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .main-nav a.active,
+    .main-nav a:hover,
+    .main-nav button.active,
+    .main-nav button:hover,
+    .nav-more.active>.more-toggle,
+    .nav-more:hover>.more-toggle,
+    .nav-more:focus-within>.more-toggle {
+      color: var(--green);
+      background: #fff;
+    }
+
+    .main-nav a.active,
+    .main-nav button.active,
+    .nav-more.active {
+      position: relative;
+      margin-top: 12px;
+    }
+
+    .nav-more {
+      position: relative;
+      display: inline-flex;
+      align-items: flex-end;
+    }
+
+    .more-toggle {
+      gap: 8px;
+    }
+
+    .more-toggle::after,
+    .select-wrap::after {
+      content: "";
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 5px solid currentColor;
+    }
+
+    .more-menu {
+      position: absolute;
+      top: calc(100% - 1px);
+      left: 0;
+      z-index: 30;
+      min-width: 178px;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px;
+      border-radius: 0 0 8px 8px;
+      background: #fff;
+      box-shadow: 0 16px 34px rgba(15, 23, 42, 0.2);
+    }
+
+    .nav-more:hover .more-menu,
+    .nav-more:focus-within .more-menu {
+      display: flex;
+    }
+
+    .main-nav .more-menu a {
+      min-height: 38px;
+      border-radius: 6px;
+      margin-top: 0;
+      padding: 0 12px;
+      color: var(--ink);
+      background: transparent;
+    }
+
+    .main-nav .more-menu a:hover,
+    .main-nav .more-menu a:focus-visible {
+      color: #fff;
+      background: var(--green);
+    }
+
+    .profile-button {
+      min-height: 36px;
+      gap: 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #fff;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .profile-button::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-right: 1.5px solid currentColor;
+      border-bottom: 1.5px solid currentColor;
+      transform: translateY(-2px) rotate(45deg);
+    }
+
+    .account-menu {
+      position: relative;
+      justify-self: end;
+    }
+
+    .account-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 60;
+      width: min(232px, calc(100vw - 24px));
+      display: none;
+      flex-direction: column;
+      padding: 8px 0;
+      border-radius: 8px;
+      color: rgba(255, 255, 255, 0.9);
+      background: #0f1726;
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.28);
+    }
+
+    .account-menu.is-open .account-dropdown {
+      display: flex;
+    }
+
+    .account-dropdown::before {
+      content: "";
+      position: absolute;
+      top: -9px;
+      right: 18px;
+      width: 18px;
+      height: 18px;
+      border-radius: 3px 0 0 0;
+      background: #0f1726;
+      transform: rotate(45deg);
+    }
+
+    .account-menu-item {
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border: 0;
+      padding: 0 16px;
+      color: rgba(255, 255, 255, 0.86);
+      background: transparent;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.8px;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    .account-menu-item svg,
+    .icon {
+      display: block;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .account-menu-item svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 1.6;
+    }
+
+    .account-menu-separator {
+      height: 1px;
+      margin: 8px 0;
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .workspace {
+      width: min(100%, 1760px);
+      margin: 0 auto;
+      padding: 26px 32px 44px;
+    }
+
+    .heading-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    .page-heading {
+      display: flex;
+      align-items: baseline;
+      gap: 24px;
+    }
+
+    .page-heading h1 {
+      margin: 0;
+      color: #111827;
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 1.15;
+    }
+
+    .page-heading p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .download-menu {
+      position: relative;
+    }
+
+    .download-toggle {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 0 13px;
+      color: var(--ink);
+      background: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(23, 33, 47, 0.05);
+    }
+
+    .download-toggle .icon {
+      color: var(--green);
+    }
+
+    .filter-panel,
+    .summary-panel,
+    .table-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .filter-panel {
+      margin-bottom: 16px;
+      padding: 14px 12px 12px;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: 180px 180px 170px minmax(190px, 1fr) minmax(170px, 1fr) 165px 235px auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .field {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      gap: 0;
+    }
+
+    .field>span:first-child {
+      min-height: 30px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-right: 0;
+      border-radius: 6px 0 0 6px;
+      padding: 0 6px;
+      color: #344054;
+      background: #f8fafc;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .control {
+      min-height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 0 6px 6px 0;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 6px;
+      padding: 0 8px;
+      color: #344054;
+      background: #fff;
+      box-shadow: none;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .control input,
+    .control select {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      color: var(--ink);
+      background: transparent;
+      font-weight: 600;
+    }
+
+    .control select {
+      padding-left: 6px;
+    }
+
+    .control select option {
+      padding: 7px 12px;
+    }
+
+    .control input::placeholder {
+      color: #667085;
+    }
+
+    .select-wrap {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .date-wrap {
+      grid-template-columns: minmax(0, 1fr);
+      padding-right: 6px;
+    }
+
+    .select-wrap select {
+      appearance: none;
+    }
+
+    .date-wrap input[type="date"] {
+      min-height: 28px;
+      cursor: pointer;
+      color-scheme: light;
+    }
+
+    .date-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+      width: 18px;
+      height: 18px;
+      margin-left: 6px;
+      cursor: pointer;
+      opacity: 0.85;
+    }
+
+    .filter-panel .control .icon {
+      display: none;
+    }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2;
+    }
+
+    .filter-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .soft-button,
+    .green-button,
+    .icon-button {
+      width: 34px;
+      min-width: 34px;
+      height: 30px;
+      min-height: 30px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-weight: 700;
+    }
+
+    .soft-button,
+    .icon-button {
+      border: 1px solid var(--line);
+      color: #344054;
+      background: #fff;
+    }
+
+    .soft-button {
+      color: var(--green-dark);
+      background: var(--green-soft);
+    }
+
+    .green-button {
+      border: 1px solid var(--green);
+      color: #fff;
+      background: linear-gradient(180deg, #06966f 0%, #047857 100%);
+      box-shadow: 0 10px 20px rgba(4, 120, 87, 0.22);
+    }
+
+    .summary-panel {
+      min-height: 88px;
+      margin-bottom: 16px;
+      padding: 18px 20px;
+      display: grid;
+      grid-template-columns: 1.5fr repeat(4, 1fr);
+      align-items: center;
+      background: linear-gradient(90deg, #f3fffb 0%, #ffffff 100%);
+    }
+
+    .summary-item {
+      min-height: 52px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 14px;
+      padding: 0 24px;
+      border-left: 1px solid var(--line);
+    }
+
+    .summary-item:first-child {
+      border-left: 0;
+      padding-left: 0;
+    }
+
+    .summary-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--green);
+      background: #dff8ed;
+    }
+
+    .summary-item:first-child .summary-icon {
+      border: 1px solid rgba(4, 120, 87, 0.22);
+      background: #fff;
+    }
+
+    .summary-label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .summary-value {
+      display: block;
+      color: #111827;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    .summary-title {
+      color: var(--green-dark);
+      font-size: 20px;
+    }
+
+    .table-panel {
+      padding: 8px 10px 10px;
+      overflow: hidden;
+    }
+
+    .table-toolbar {
+      min-height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .toolbar-kpis {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 22px;
+      margin-left: auto;
+    }
+
+    .toolbar-kpi {
+      min-width: 190px;
+      display: grid;
+      gap: 4px;
+      border-left: 1px solid var(--line);
+      padding-left: 22px;
+    }
+
+    .toolbar-kpi-label {
+      display: block;
+      color: #475467;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .toolbar-kpi-value {
+      display: block;
+      color: #061a33;
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1.2;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .entries-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #061a33;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .entries-control select {
+      min-width: 66px;
+      min-height: 28px;
+      border: 2px solid #111827;
+      border-radius: 6px;
+      padding: 0 8px;
+      color: #061a33;
+      background: #fff;
+      font-weight: 600;
+    }
+
+    .icon-button {
+      color: #667085;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1630px;
+      table-layout: fixed;
+      font-size: 14px;
+    }
+
+    thead th {
+      height: 38px;
+      overflow: hidden;
+      padding: 0 6px;
+      color: var(--green-dark);
+      background: linear-gradient(180deg, #d8f3e6 0%, #c3ead9 100%);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    tbody td {
+      height: 36px;
+      border-bottom: 1px solid #e7ecf2;
+      overflow: hidden;
+      padding: 0 9px;
+      color: #17212f;
+      font-weight: 500;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .product-change-cell,
+    .supplier-comment-cell {
+      padding-top: 5px;
+      padding-bottom: 5px;
+      vertical-align: middle;
+      white-space: normal;
+    }
+
+    .product-change {
+      display: grid;
+      gap: 2px;
+      line-height: 1.25;
+    }
+
+    .product-change-final {
+      display: grid;
+      grid-template-columns: 14px minmax(0, 1fr);
+      gap: 3px;
+    }
+
+    .product-change-arrow {
+      color: var(--green-dark);
+      font-weight: 700;
+    }
+
+    .product-name,
+    .supplier-comment {
+      display: -webkit-box;
+      overflow: hidden;
+      overflow-wrap: anywhere;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+    }
+
+    .supplier-comment {
+      line-height: 1.3;
+    }
+
+    tbody tr:hover {
+      background: #f8fffc;
+    }
+
+    .table-panel table th:nth-child(7),
+    .table-panel table td:nth-child(7),
+    .table-panel table th:nth-child(8),
+    .table-panel table td:nth-child(8) {
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .table-panel table th:nth-child(1) { width: 80px; }
+    .table-panel table th:nth-child(2) { width: 140px; }
+    .table-panel table th:nth-child(3) { width: 90px; }
+    .table-panel table th:nth-child(4) { width: 390px; }
+    .table-panel table th:nth-child(5) { width: 130px; }
+    .table-panel table th:nth-child(6) { width: 130px; }
+    .table-panel table th:nth-child(7) { width: 75px; }
+    .table-panel table th:nth-child(8) { width: 75px; }
+    .table-panel table th:nth-child(9) { width: 230px; }
+    .table-panel table th:nth-child(10) { width: 130px; }
+    .table-panel table th:nth-child(11) { width: 140px; }
+
+    .sort {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .sort::after {
+      content: "↕";
+      color: #000;
+      font-size: 13px;
+    }
+
+    th[aria-sort="ascending"] .sort::after {
+      content: "\2191";
+    }
+
+    th[aria-sort="descending"] .sort::after {
+      content: "\2193";
+    }
+
+    .sort:focus-visible {
+      border-radius: 3px;
+      outline: 2px solid var(--green);
+      outline-offset: 2px;
+    }
+
+    .table-footer {
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 10px 2px 0;
+      color: #344054;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .page-button {
+      min-width: 32px;
+      min-height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: #17212f;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .page-button.active {
+      border-color: var(--green);
+      color: #fff;
+      background: var(--green);
+      box-shadow: none;
+    }
+
+    .page-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.42;
+    }
+
+    .site-footer {
+      margin-top: 22px;
+      border-top: 1px solid rgba(217, 224, 232, 0.9);
+      padding: 22px 0 2px;
+      color: #7a879a;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media (max-width: 1650px) {
+      .filter-grid {
+        grid-template-columns: repeat(3, minmax(190px, 1fr));
+      }
+
+      .filter-actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 1200px) {
+
+      .summary-panel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .summary-item {
+        border-left: 0;
+        padding: 0;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        grid-template-columns: 1fr;
+        padding: 12px 16px 0;
+      }
+
+      .main-nav {
+        overflow-x: auto;
+      }
+
+      .workspace {
+        padding: 22px 16px 34px;
+      }
+
+      .heading-row,
+      .page-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .filter-grid,
+      .summary-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-actions,
+      .table-toolbar,
+      .table-footer {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .filter-actions {
+        justify-content: flex-start;
+      }
+
+      .toolbar-kpis {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .toolbar-kpi {
+        min-width: 0;
+        border-left: 0;
+        padding-left: 0;
+      }
+    }
+    /* Report consistency refinements */
+    .download-toggle {
+      min-height: 38px;
+      border: 1px solid #cfd8e3;
+      border-radius: 7px;
+      color: #061a33;
+      background: #fff;
+      box-shadow: 0 6px 16px rgba(23, 33, 47, 0.06);
+    }
+
+    .download-toggle:hover,
+    .download-toggle:focus-visible {
+      border-color: #10b981;
+      color: var(--green);
+      outline: 0;
+    }
+
+    .filter-panel {
+      border-top: 4px solid var(--green);
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 8px 22px rgba(23, 33, 47, 0.08);
+    }
+
+    .field>span:first-child,
+    .field-label {
+      color: #475467;
+      background: #f8fafc;
+      font-weight: 700;
+    }
+
+    .control {
+      min-height: 32px;
+    }
+
+    .green-button {
+      width: 38px;
+      min-width: 38px;
+      height: 36px;
+      min-height: 36px;
+      border-radius: 7px;
+      background: linear-gradient(180deg, #06966f 0%, #047857 100%);
+      box-shadow: 0 10px 20px rgba(4, 120, 87, 0.18);
+    }
+
+    .soft-button,
+    .icon-button {
+      width: 38px;
+      min-width: 38px;
+      height: 36px;
+      min-height: 36px;
+      border: 1px solid #b7dfd3;
+      border-radius: 7px;
+      color: var(--green);
+      background: #fff;
+    }
+
+    .table-panel {
+      padding: 12px 10px 10px;
+      background: rgba(255, 255, 255, 0.97);
+      box-shadow: 0 8px 22px rgba(23, 33, 47, 0.08);
+    }
+
+    thead th {
+      height: 39px;
+      background: linear-gradient(180deg, #d8f3e6 0%, #bdebd8 100%);
+    }
+
+    tbody td {
+      height: 37px;
+    }
+
+    tbody tr:hover td,
+    tbody tr:hover {
+      background: #f6fffb;
+    }
+
+    .pagination button,
+    .page-button {
+      border-color: #d9e0e8;
+      background: #fff;
+    }
+  </style>
+  <link rel="stylesheet" href="navigation.css" />
+</head>
+
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="CASCADE home">
+        <img class="brand-logo" src="logo.png" alt="CASCADE Plus" />
+      </a>
+      <nav class="main-nav" aria-label="Primary">
+        <a href="Dashboard.html">Dashboard</a>
+        <a href="index.html">Order Pad</a>
+        <a href="history.html">Order History</a>
+        <a class="active" href="report.html" aria-current="page">Reports</a>
+        <a href="help.html">Help</a>
+        <div class="nav-more">
+          <button class="more-toggle" type="button" aria-haspopup="true" aria-expanded="false">More</button>
+          <div class="more-menu" role="menu">
+            <a href="pending.html" role="menuitem">Pending Order</a>
+            <a href="outofstock.html" role="menuitem">Out Of Stock</a>
+            <a href="settings.html" role="menuitem">Settings</a>
+          </div>
+        </div>
+      </nav>
+      <div class="account-menu">
+        <button class="profile-button" type="button" aria-haspopup="true" aria-expanded="false">HI, DUMMY1</button>
+        <div class="account-dropdown" role="menu">
+          <button class="account-menu-item" type="button" role="menuitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 11.5 12 4l9 7.5"></path>
+              <path d="M5.5 10.5V20h13v-9.5"></path>
+              <path d="M9.5 17h5"></path>
+              <path d="M9 14h2"></path>
+              <path d="M13 14h2"></path>
+            </svg>
+            Reset Password
+          </button>
+          <span class="account-menu-separator" aria-hidden="true"></span>
+          <button class="account-menu-item" type="button" role="menuitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="7.5" cy="16.5" r="3"></circle>
+              <path d="m10 14 7.5-7.5"></path>
+              <path d="m15.5 8.5 2 2"></path>
+              <path d="m18 6 2 2"></path>
+            </svg>
+            Log Out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <div class="heading-row">
+        <section class="page-heading" aria-labelledby="reportTitle">
+          <h1 id="reportTitle">Order Report</h1>
+          <p>View and analyse your order performance.</p>
+        </section>
+        <div class="download-menu">
+          <button class="download-toggle" type="button" aria-label="Download CSV">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v12"></path>
+              <path d="m8 11 4 4 4-4"></path>
+              <path d="M5 21h14"></path>
+            </svg>
+            Download
+          </button>
+        </div>
+      </div>
+
+      <section class="filter-panel" aria-label="Report filters">
+        <div class="filter-grid">
+          <label class="field">
+            <span>From</span>
+            <span class="control date-wrap">
+              <input type="date" value="2026-10-09" aria-label="From date" lang="en-GB" />
+            </span>
+          </label>
+
+          <label class="field">
+            <span>To</span>
+            <span class="control date-wrap">
+              <input type="date" value="2026-10-15" aria-label="To date" lang="en-GB" />
+            </span>
+          </label>
+
+          <label class="field">
+            <span>Order ID</span>
+            <span class="control">
+              <input type="search" placeholder="Order ID..." aria-label="Order ID" inputmode="numeric" />
+            </span>
+          </label>
+
+          <label class="field">
+            <span>Product</span>
+            <span class="control">
+              <input type="search" placeholder="Search product..." aria-label="Product" />
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="m16.5 16.5 4 4"></path>
+              </svg>
+            </span>
+          </label>
+
+          <label class="field">
+            <span>Supplier</span>
+            <span class="control select-wrap">
+              <select aria-label="Supplier">
+                <option>--Select Supplier--</option>
+                <option>AAH</option>
+                <option>Alliance</option>
+                <option>Phoenix</option>
+                <option>Ethigen</option>
+                <option>OTC Direct</option>
+                <option>Trident</option>
+                <option>B&amp;S Distribution</option>
+                <option>Block</option>
+                <option>Lexon</option>
+              </select>
+            </span>
+          </label>
+
+          <label class="field">
+            <span>Pharmacy</span>
+            <span class="control select-wrap">
+              <select aria-label="Pharmacy">
+                <option>Dummy</option>
+              </select>
+            </span>
+          </label>
+
+          <label class="field">
+            <span>Change Type</span>
+            <span class="control select-wrap">
+              <select aria-label="Change Type">
+                <option>All</option>
+                <option>Product Changes Only</option>
+                <option>Brand ↔ Generic</option>
+                <option>No Optimisation</option>
+              </select>
+            </span>
+          </label>
+
+          <div class="filter-actions">
+            <button class="green-button" type="button" aria-label="Search report" title="Search">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="m16.5 16.5 4 4"></path>
+              </svg>
+            </button>
+            <button class="soft-button" type="button" aria-label="Reset filters" title="Reset filters">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 12a9 9 0 1 0 3-6.7"></path>
+                <path d="M3 4v5h5"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="table-panel" aria-label="Order report table">
+        <div class="table-toolbar">
+          <label class="entries-control">
+            Show
+            <select id="entriesPerPage" aria-label="Entries per page">
+              <option>10</option>
+              <option>25</option>
+              <option>50</option>
+              <option>100</option>
+            </select>
+            entries
+          </label>
+          <div class="toolbar-kpis" aria-label="Filtered quantity totals">
+            <div class="toolbar-kpi">
+              <span class="toolbar-kpi-label">Total Requested Qty</span>
+              <strong class="toolbar-kpi-value" id="requestedQtyTotal">0</strong>
+            </div>
+            <div class="toolbar-kpi">
+              <span class="toolbar-kpi-label">Total Received Qty</span>
+              <strong class="toolbar-kpi-value" id="receivedQtyTotal">0</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th data-sort-key="orderId"><span class="sort" role="button" tabindex="0">Order ID</span></th>
+                <th data-sort-key="dateSort"><span class="sort" role="button" tabindex="0">Date</span></th>
+                <th data-sort-key="pip"><span class="sort" role="button" tabindex="0">PIP Code</span></th>
+                <th data-sort-key="product"><span class="sort" role="button" tabindex="0">Product Change</span></th>
+                <th data-sort-key="optimisationType"><span class="sort" role="button" tabindex="0">Change Type</span></th>
+                <th data-sort-key="supplier"><span class="sort" role="button" tabindex="0">Supplier Name</span></th>
+                <th data-sort-key="requestedQty"><span class="sort" role="button" tabindex="0">Req. Qty</span></th>
+                <th data-sort-key="receivedQty"><span class="sort" role="button" tabindex="0">Rec. Qty</span></th>
+                <th>Supplier Comment</th>
+                <th data-sort-key="confirmedSaving"><span class="sort" role="button" tabindex="0">Confirmed Saving</span></th>
+                <th data-sort-key="orderPlacedBy"><span class="sort" role="button" tabindex="0">Order Placed By</span></th>
+              </tr>
+            </thead>
+            <tbody id="orderReportBody">
+              <tr>
+                <td>336291</td>
+                <td>14 Jul 2026, 12:37</td>
+                <td>115626</td>
+                <td>Tildiem Retard 90mg tabs (56)</td>
+                <td>Phoenix</td>
+                <td>0</td>
+                <td>1</td>
+                <td>Quantity to deliver : 0 Status : OOS - Out Of Stock</td>
+                <td data-order-placed-by>Not Recorded</td>
+              </tr>
+              <tr>
+                <td>336291</td>
+                <td>14 Jul 2026, 12:37</td>
+                <td>115626</td>
+                <td>Tildiem Retard 90mg tabs (56)</td>
+                <td>AAH</td>
+                <td>1</td>
+                <td>1</td>
+                <td>OK</td>
+                <td data-order-placed-by>Not Recorded</td>
+              </tr>
+              <tr>
+                <td>336278</td>
+                <td>14 Jul 2026, 11:59</td>
+                <td>3883139</td>
+                <td>Nexium Control gr 20mg tabs (14)</td>
+                <td>AAH</td>
+                <td>6</td>
+                <td>6</td>
+                <td>OK</td>
+                <td data-order-placed-by>Not Recorded</td>
+              </tr>
+              <tr>
+                <td>336278</td>
+                <td>14 Jul 2026, 11:59</td>
+                <td>4133732</td>
+                <td>PYROCALM CONTROL gast-res 20mg tabs (14)</td>
+                <td>Alliance</td>
+                <td>6</td>
+                <td>6</td>
+                <td>All medical products currently in stock</td>
+                <td data-order-placed-by>Not Recorded</td>
+              </tr>
+              <tr>
+                <td>336278</td>
+                <td>14 Jul 2026, 11:59</td>
+                <td>3721024</td>
+                <td>Arnicare cooling gel (30g)</td>
+                <td>AAH</td>
+                <td>6</td>
+                <td>6</td>
+                <td>SUPPLYING FROM</td>
+                <td data-order-placed-by>Not Recorded</td>
+              </tr>
+              <tr>
+                <td>336278</td>
+                <td>14 Jul 2026, 11:59</td>
+                <td>1021369</td>
+                <td>Glycerin suppos adult 4g (12)</td>
+                <td>B&amp;S Distribution</td>
+                <td>6</td>
+                <td>6</td>
+                <td>In Stock</td>
+                <td data-order-placed-by>Not Recorded</td>
+              </tr>
+              <tr>
+                <td>336277</td>
+                <td>14 Jul 2026, 11:58</td>
+                <td>3587607</td>
+                <td>Jext 300mcg/0.3ml [ 1 in 1000] inj</td>
+                <td>Alliance</td>
+                <td>2</td>
+                <td>2</td>
+                <td>Success</td>
+                <td data-order-placed-by>Not Recorded</td>
+              </tr>
+              <tr>
+                <td>336277</td>
+                <td>14 Jul 2026, 11:58</td>
+                <td>1241363</td>
+                <td>Ciprofloxacin 500mg tabs (10)</td>
+                <td>B&amp;S Distribution</td>
+                <td>1</td>
+                <td>1</td>
+                <td>In Stock</td>
+                <td data-order-placed-by>Not Recorded</td>
+              </tr>
+              <tr>
+                <td>336277</td>
+                <td>14 Jul 2026, 11:58</td>
+                <td>7368129</td>
+                <td>Tramadol 50mg caps (100)</td>
+                <td>Phoenix</td>
+                <td>1</td>
+                <td>1</td>
+                <td>Successful</td>
+                <td data-order-placed-by>Not Recorded</td>
+              </tr>
+              <tr>
+                <td>336277</td>
+                <td>14 Jul 2026, 11:58</td>
+                <td>4033510</td>
+                <td>Sevodyne 10mcg/hr 7 day patch (4)</td>
+                <td>Alliance</td>
+                <td>1</td>
+                <td>1</td>
+                <td>Success</td>
+                <td data-order-placed-by>Not Recorded</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-footer">
+          <span>Showing 1 to 10 of 1,715 entries</span>
+          <nav class="pagination" aria-label="Pagination">
+            <button class="page-button" type="button" aria-label="Previous">‹</button>
+            <button class="page-button active" type="button" aria-current="page">1</button>
+            <button class="page-button" type="button">2</button>
+            <button class="page-button" type="button" aria-label="Next">›</button>
+          </nav>
+        </div>
+      </section>
+      <footer class="site-footer">© 2019-2026 Cascade Plus. All rights reserved. Powered by LuxshTech.</footer>
+    </main>
+  </div>
+
+  <script src="account-menu.js"></script>
+  <script src="orderhistory-data.js"></script>
+  <script src="order-report.js"></script>
+</body>
+
+</html>

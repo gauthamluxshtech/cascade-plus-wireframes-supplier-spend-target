@@ -1,0 +1,2483 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CASCADE Savings Report</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        :root {
+            --green: #047857;
+            --green-dark: #065f46;
+            --green-soft: #ecfdf5;
+            --ink: #17212f;
+            --muted: #667085;
+            --line: #d9e0e8;
+            --soft: #f6f8fa;
+            --panel: #ffffff;
+            --red: #dc2626;
+            --amber: #d97706;
+            --teal: #0e7490;
+            --shadow: 0 14px 34px rgba(23, 33, 47, 0.1);
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        body {
+            margin: 0;
+            min-width: 320px;
+            color: var(--ink);
+            background: #f6f8f7;
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center bottom;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: 3px solid rgba(4, 120, 87, 0.22);
+            outline-offset: 2px;
+        }
+
+        .workspace {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 26px;
+        }
+
+        .heading-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 18px;
+            margin-bottom: 1px;
+        }
+
+        .page-heading {
+            display: flex;
+            align-items: baseline;
+            gap: 24px;
+        }
+
+        .page-heading h1 {
+            margin: 0;
+            color: #111827;
+            font-size: 28px;
+            font-weight: 600;
+            line-height: 1.15;
+        }
+
+        .page-heading p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+            font-weight: 600
+        }
+
+        .primary-button,
+        .secondary-button,
+        .icon-filter-button {
+            min-height: 38px;
+            border-radius: 7px;
+            font-weight: 800;
+        }
+
+        .primary-button {
+            border: 0;
+            padding: 0 16px;
+            color: #fff;
+            background: var(--green);
+        }
+
+        .primary-button:hover {
+            background: var(--green-dark);
+        }
+
+        .secondary-button {
+            border: 1px solid var(--line);
+            padding: 0 14px;
+            color: var(--ink);
+            background: #fff;
+        }
+
+        .icon-filter-button {
+            width: 40px;
+            min-width: 40px;
+            padding: 0;
+            display: inline-grid;
+            place-items: center;
+            font-size: 17px;
+        }
+
+        .savings-report-view {
+            display: grid;
+            gap: 16px;
+        }
+
+        .savings-kpi-card,
+        .savings-chart-card,
+        .savings-methodology-box {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+        }
+
+        .savings-filter-bar {
+            display: grid;
+            grid-template-columns: minmax(340px, 1.15fr) minmax(195px, .7fr) minmax(195px, .7fr) minmax(360px, 1.3fr) auto;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 0;
+            padding: 14px 12px 12px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: var(--shadow);
+        }
+
+        .field {
+            min-width: 0;
+            display: grid;
+            grid-template-columns: max-content minmax(0, 1fr);
+            gap: 0;
+        }
+
+        .field>span:first-child,
+        .field-label {
+            min-height: 30px;
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid var(--line);
+            border-right: 0;
+            border-radius: 6px 0 0 6px;
+            padding: 0 9px;
+            color: #344054;
+            background: #f8fafc;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .control {
+            min-height: 30px;
+            border: 1px solid var(--line);
+            border-radius: 0 6px 6px 0;
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 6px;
+            padding: 0 8px;
+            color: #344054;
+            background: #fff;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .control input,
+        .control select {
+            width: 100%;
+            min-width: 0;
+            min-height: 28px;
+            border: 0;
+            outline: 0;
+            color: var(--ink);
+            background: transparent;
+            font-weight: 600;
+        }
+
+        .select-wrap {
+            grid-template-columns: minmax(0, 1fr) auto;
+        }
+
+        .select-wrap select {
+            appearance: none;
+        }
+
+        .select-wrap::after,
+        .multi-select-toggle::after {
+            content: "";
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 5px solid currentColor;
+        }
+
+        .date-wrap {
+            grid-template-columns: minmax(0, 1fr);
+            position: relative;
+            padding: 0 34px 0 8px;
+        }
+
+        .date-wrap input[type="date"] {
+            display: block;
+            width: 100%;
+            min-width: 0;
+            padding: 0;
+            color-scheme: light;
+            cursor: pointer;
+        }
+
+        .date-wrap::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            width: 16px;
+            height: 16px;
+            transform: translateY(-50%);
+            pointer-events: none;
+            background: center / 16px 16px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2317212f' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cpath d='M16 2v4M8 2v4M3 10h18'/%3E%3C/svg%3E");
+        }
+
+        .date-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            width: 20px;
+            height: 20px;
+            margin: 0;
+            transform: translateY(-50%);
+            cursor: pointer;
+            opacity: 0;
+        }
+
+        .filter-label-row {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .range-limit-note {
+            color: var(--red);
+            font-size: 10px;
+            font-weight: 900;
+            line-height: 1;
+            text-transform: none;
+            white-space: nowrap;
+        }
+
+        .custom-date-range {
+            display: contents;
+        }
+
+        .custom-date-range[hidden] {
+            display: none !important;
+        }
+
+        .filter-actions {
+            display: flex;
+            grid-column: 5;
+            grid-row: 1;
+            justify-content: flex-end;
+            gap: 6px;
+        }
+
+        .icon-filter-button {
+            width: 34px;
+            min-width: 34px;
+            height: 30px;
+            min-height: 30px;
+            border-radius: 6px;
+            display: inline-grid;
+            place-items: center;
+            padding: 0;
+            font-size: 17px;
+            line-height: 1;
+        }
+
+        .multi-select {
+            position: relative;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .multi-select-toggle {
+            width: auto;
+            max-width: 100%;
+            min-height: 28px;
+            border: 0;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 6px;
+            color: var(--ink);
+            background: transparent;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .savings-filter-bar .multi-select-toggle span {
+            color: var(--ink);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: none;
+        }
+
+        .multi-select-menu {
+            position: absolute;
+            z-index: 20;
+            top: calc(100% + 4px);
+            left: 0;
+            width: min(320px, 100vw - 48px);
+            max-height: 280px;
+            overflow-y: auto;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            padding: 6px;
+            background: #fff;
+            box-shadow: 0 14px 30px rgba(17, 24, 39, 0.16);
+        }
+
+        .multi-select-option {
+            display: flex !important;
+            align-items: center;
+            gap: 9px !important;
+            min-height: 34px;
+            border-radius: 5px;
+            padding: 6px 8px;
+            cursor: pointer;
+        }
+
+        .multi-select-option:hover,
+        .multi-select-option[aria-selected="true"] {
+            background: var(--green-soft);
+        }
+
+        .multi-select-option input {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            accent-color: var(--green);
+        }
+
+        .savings-filter-bar .multi-select-option span {
+            color: var(--ink);
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: none;
+        }
+
+        .savings-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(220px, 1fr));
+            gap: 14px;
+        }
+
+        .savings-kpi-card {
+            position: relative;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 18px;
+            min-height: 86px;
+            overflow: hidden;
+            padding: 18px 22px;
+            border-left: 1px solid var(--line);
+            background: linear-gradient(145deg, var(--tint, #f3fffb), #fff 66%);
+        }
+
+        .savings-kpi-card::after {
+            content: "";
+            position: absolute;
+            right: 26px;
+            bottom: -6px;
+            width: 14px;
+            height: 52px;
+            opacity: .1;
+            background: var(--accent, var(--green));
+            border-radius: 8px 8px 0 0;
+            box-shadow: -24px 13px 0 0 var(--accent, var(--green)),
+                -48px 25px 0 0 var(--accent, var(--green)),
+                -72px 39px 0 0 var(--accent, var(--green));
+        }
+
+        .kpi-copy {
+            min-width: 0;
+        }
+
+        .kpi-label {
+            display: block;
+            margin: 0;
+            color: #25324a;
+            font-size: 25px;
+            font-weight: 600;
+        }
+
+        .kpi-value {
+            display: block;
+            overflow: hidden;
+            color: var(--accent, var(--green));
+            font-size: 30px;
+            font-weight: 700;
+            white-space: nowrap;
+            line-height: 1.2;
+            text-overflow: ellipsis;
+            text-align: right;
+        }
+
+        .savings-analytics-grid {
+            display: grid;
+            grid-template-columns: minmax(560px, 1.45fr) minmax(390px, 0.9fr);
+            align-items: stretch;
+            gap: 16px;
+        }
+
+        .savings-chart-card {
+            min-height: 376px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .card-heading h2,
+        .savings-methodology-box h2 {
+            margin: 0;
+            color: var(--ink);
+            font-size: 18px;
+            line-height: 1.2;
+        }
+
+        .card-heading p {
+            margin: 5px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .card-heading select {
+            min-height: 34px;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            padding: 0 10px;
+            color: var(--muted);
+            background: #fff;
+        }
+
+        .info-icon {
+            width: 19px;
+            height: 19px;
+            display: inline-grid;
+            place-items: center;
+            border-radius: 999px;
+            color: var(--green);
+            background: var(--green-soft);
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .small-info {
+            width: 16px;
+            height: 16px;
+            color: var(--muted);
+            background: #f3f4f6;
+            font-size: 10px;
+        }
+
+        .methodology-info-icon {
+            width: 30px;
+            height: 30px;
+            align-self: start;
+            margin-top: 2px;
+            color: #ffffff;
+            background: #2e8165;
+            font-size: 15px;
+            line-height: 1;
+        }
+
+        .top-products-grid {
+            overflow: hidden;
+            border: 1px solid #edf0f4;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .top-products-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .top-products-table th {
+            height: 38px;
+            padding: 0 16px;
+            color: var(--green-dark);
+            background: linear-gradient(180deg, #d8f3e6 0%, #c3ead9 100%);
+            font-size: 13px;
+            font-weight: 700;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .top-products-table th.numeric,
+        .top-products-table td.numeric {
+            text-align: right;
+        }
+
+        .top-products-table th.center,
+        .top-products-table td.center {
+            text-align: center;
+        }
+
+        .top-products-table td {
+            padding: 10px 16px;
+            border-top: 1px solid #e5e7eb;
+            color: var(--ink);
+            font-size: 15px;
+            font-weight: 600;
+            vertical-align: middle;
+        }
+
+        .top-products-table .rank-col {
+            width: 44px;
+        }
+
+        .top-products-table .savings-col {
+            width: 230px;
+        }
+
+        .top-products-table .number-col {
+            width: 86px;
+        }
+
+        .top-product-row {
+            transition: background 140ms ease;
+        }
+
+        .top-product-row:hover td {
+            background: #f8fffc;
+        }
+
+        .top-product-rank {
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            color: #fff;
+            background: linear-gradient(135deg, var(--green), var(--green-dark));
+            box-shadow: 0 6px 14px rgba(4, 120, 87, 0.18);
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .top-product-name {
+            display: block;
+            overflow: hidden;
+            color: var(--ink);
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 1.3;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .top-product-saving-cell {
+            display: grid;
+            grid-template-columns: minmax(72px, 1fr) minmax(64px, auto);
+            gap: 10px;
+            align-items: center;
+        }
+
+        .top-product-saving-track {
+            height: 11px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #e5f4ef;
+        }
+
+        .top-product-saving-fill {
+            display: block;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #10b981 0%, #059669 55%, #006b4f 100%);
+        }
+
+        .top-product-saving {
+            color: var(--ink);
+            font-size: 15px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .top-product-tile {
+            min-width: 0;
+            min-height: 78px;
+            display: grid;
+            grid-template-columns: 34px minmax(0, 1fr) minmax(86px, auto);
+            gap: 10px;
+            align-items: center;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--ink);
+            background: #fff;
+            box-shadow: 0 8px 20px rgba(17, 24, 39, 0.04);
+        }
+
+        .top-products-empty {
+            grid-column: 1 / -1;
+            min-height: 220px;
+            display: grid;
+            place-content: center;
+            justify-items: center;
+            gap: 8px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 18px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .skeleton-line {
+            display: block;
+            height: 12px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #eef2f7, #f8fafc, #eef2f7);
+            background-size: 200% 100%;
+            animation: skeletonPulse 1.2s linear infinite;
+        }
+
+        .skeleton-line.wide {
+            width: 100%;
+        }
+
+        .skeleton-line.short {
+            width: 68%;
+        }
+
+        @keyframes skeletonPulse {
+            from {
+                background-position: 200% 0;
+            }
+
+            to {
+                background-position: -200% 0;
+            }
+        }
+
+        .vertical-chart {
+            flex: 1;
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            padding-top: 8px;
+        }
+
+        .chart-stage-row {
+            flex: 1;
+            min-height: 250px;
+            display: grid;
+            grid-template-columns: 44px minmax(0, 1fr);
+            align-items: stretch;
+            gap: 12px;
+        }
+
+        .chart-y-axis {
+            position: relative;
+            display: block;
+            height: 100%;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .chart-y-axis span {
+            position: absolute;
+            right: 0;
+            transform: translateY(-50%);
+        }
+
+        .grid-lines {
+            position: absolute;
+            inset: 0;
+            display: block;
+            pointer-events: none;
+        }
+
+        .grid-lines span {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .line-chart-stage {
+            position: relative;
+            z-index: 1;
+            min-width: 0;
+            height: 100%;
+            border-bottom: 1px solid #d1d5db;
+        }
+
+        .line-chart-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        .line-chart-svg .line-area {
+            fill: url(#savingsAreaGradient);
+        }
+
+        .line-chart-svg .line-path {
+            fill: none;
+            stroke: #10b981;
+            stroke-width: 1.4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            vector-effect: non-scaling-stroke;
+        }
+
+        .line-chart-dot {
+            position: absolute;
+            z-index: 2;
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--green);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.95);
+            transform: translate(-50%, -50%);
+        }
+
+        .line-chart-value {
+            position: absolute;
+            z-index: 2;
+            color: var(--green-dark);
+            font-size: 11px;
+            font-weight: 900;
+            line-height: 1;
+            white-space: nowrap;
+            transform: translate(-50%, -100%);
+        }
+
+        .line-chart-x-axis {
+            display: grid;
+            gap: 8px;
+            margin-left: 56px;
+            padding-top: 8px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 14px;
+            margin-left: 56px;
+            margin-top: 8px;
+            color: var(--ink);
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .chart-legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-swatch {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+        }
+
+        .legend-swatch.savings {
+            background: var(--green);
+        }
+
+        .savings-methodology-box {
+            display: grid;
+            grid-template-columns: 28px minmax(240px, 1fr) minmax(360px, 1.25fr) minmax(260px, 0.9fr);
+            gap: 16px;
+            align-items: center;
+            padding: 18px;
+            background: linear-gradient(135deg, #fff, var(--green-soft));
+        }
+
+        .savings-methodology-box p {
+            margin: 5px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .formula-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .formula-pill {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 42px;
+            border: 1px solid rgba(4, 120, 87, 0.24);
+            border-radius: 7px;
+            padding: 8px 14px;
+            color: var(--green-dark);
+            background: #fff;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .savings-methodology-box ul {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.55;
+        }
+
+        .toast-region {
+            position: fixed;
+            z-index: 80;
+            top: 18px;
+            right: 18px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .toast {
+            width: min(360px, calc(100vw - 36px));
+            border-left: 4px solid var(--green);
+            border-radius: 8px;
+            padding: 13px 15px;
+            background: #fff;
+            box-shadow: var(--shadow);
+            font-weight: 800;
+        }
+
+        @media (max-width: 1280px) {
+            .savings-kpi-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .savings-filter-bar {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .filter-actions {
+                grid-column: 1 / -1;
+                grid-row: auto;
+                align-self: end;
+                justify-content: flex-end;
+            }
+
+            .savings-analytics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .savings-methodology-box {
+                grid-template-columns: 28px 1fr;
+            }
+
+            .formula-list,
+            .savings-methodology-box ul {
+                grid-column: 2;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .workspace {
+                padding: 18px 12px;
+            }
+
+            .heading-row,
+            .savings-report-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .savings-filter-bar,
+            .savings-kpi-grid,
+            .savings-analytics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .vertical-chart {
+                min-height: 320px;
+            }
+
+            .custom-date-range,
+            .top-products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-actions button,
+            .report-actions button {
+                width: 100%;
+            }
+
+            .savings-methodology-box {
+                grid-template-columns: 1fr;
+            }
+
+            .formula-list,
+            .savings-methodology-box ul {
+                grid-column: auto;
+            }
+        }
+
+        /* Unified report styling: aligned with Order Report */
+        .workspace {
+            width: min(100%, 1760px);
+            margin: 0 auto;
+            padding: 26px 32px 44px;
+        }
+
+        .heading-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 16px;
+        }
+
+        .page-heading {
+            display: flex;
+            align-items: baseline;
+            gap: 24px;
+        }
+
+        .page-heading h1 {
+            margin: 0;
+            color: #111827;
+            font-size: 28px;
+            font-weight: 600;
+            line-height: 1.15;
+        }
+
+        .page-heading p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .download-toggle {
+            min-height: 38px;
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            padding: 0 13px;
+            color: var(--ink);
+            background: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(23, 33, 47, 0.05);
+        }
+
+        .download-toggle .icon,
+        .filter-panel .icon,
+        .green-button .icon,
+        .soft-button .icon {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+        }
+
+        .download-toggle .icon {
+            color: var(--green);
+        }
+
+        .filter-panel,
+        .table-panel,
+        .savings-filter-bar,
+        .savings-kpi-card,
+        .savings-chart-card,
+        .savings-methodology-box {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: var(--shadow);
+        }
+
+        .filter-panel,
+        .savings-filter-bar {
+            margin-bottom: 0;
+            padding: 14px 12px 12px;
+        }
+
+        .filter-grid,
+        .savings-filter-bar {
+            gap: 8px;
+            align-items: center;
+        }
+
+        .field {
+            min-width: 0;
+            display: grid;
+            grid-template-columns: max-content minmax(0, 1fr);
+            gap: 0;
+        }
+
+        .field>span:first-child,
+        .field-label {
+            min-height: 30px;
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid var(--line);
+            border-right: 0;
+            border-radius: 6px 0 0 6px;
+            padding: 0 9px;
+            color: #344054;
+            background: #f8fafc;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .control {
+            min-height: 30px;
+            border: 1px solid var(--line);
+            border-radius: 0 6px 6px 0;
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 6px;
+            padding: 0 8px;
+            color: #344054;
+            background: #fff;
+            box-shadow: none;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .control input,
+        .control select {
+            width: 100%;
+            min-width: 0;
+            min-height: 28px;
+            border: 0;
+            outline: 0;
+            color: var(--ink);
+            background: transparent;
+            font-weight: 600;
+        }
+
+        .select-wrap {
+            grid-template-columns: minmax(0, 1fr) auto;
+        }
+
+        .select-wrap select {
+            appearance: none;
+        }
+
+        .date-wrap {
+            grid-template-columns: minmax(0, 1fr);
+            padding-right: 6px;
+        }
+
+        .date-wrap input[type="date"] {
+            color-scheme: light;
+            cursor: pointer;
+        }
+
+        .date-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+            width: 18px;
+            height: 18px;
+            margin-left: 6px;
+            cursor: pointer;
+            opacity: 0.85;
+        }
+
+        .filter-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 6px;
+        }
+
+        .soft-button,
+        .green-button,
+        .icon-button,
+        .icon-filter-button {
+            width: 34px;
+            min-width: 34px;
+            height: 30px;
+            min-height: 30px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            font-weight: 700;
+        }
+
+        .soft-button,
+        .icon-button,
+        .secondary-button.icon-filter-button {
+            border: 1px solid var(--line);
+            color: var(--green-dark);
+            background: var(--green-soft);
+        }
+
+        .green-button,
+        .primary-button.icon-filter-button {
+            border: 1px solid var(--green);
+            color: #fff;
+            background: linear-gradient(180deg, #06966f 0%, #047857 100%);
+            box-shadow: 0 10px 20px rgba(4, 120, 87, 0.22);
+        }
+
+        .table-panel {
+            padding: 8px 10px 10px;
+            overflow: hidden;
+        }
+
+        .table-toolbar {
+            min-height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .entries-control,
+        .entries-row label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #061a33;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .entries-control select,
+        .entries-row select {
+            min-width: 66px;
+            min-height: 28px;
+            border: 2px solid #111827;
+            border-radius: 6px;
+            padding: 0 8px;
+            color: #061a33;
+            background: #fff;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead th,
+        .savings-details-table th {
+            height: 38px;
+            padding: 0 16px;
+            color: var(--green-dark);
+            background: linear-gradient(180deg, #d8f3e6 0%, #c3ead9 100%);
+            font-size: 13px;
+            font-weight: 700;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        tbody td,
+        .savings-details-table td {
+            height: 36px;
+            border-bottom: 1px solid #e7ecf2;
+            padding: 0 16px;
+            color: #17212f;
+            background: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        tbody tr:nth-child(odd) td {
+            background: #fff;
+        }
+
+        tbody tr:hover td,
+        tbody tr:hover,
+        .savings-details-table tbody tr:hover td {
+            background: #f8fffc;
+        }
+
+        .num,
+        td.num,
+        th.num,
+        .numeric {
+            text-align: right !important;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .table-footer {
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 10px 2px 0;
+            color: #344054;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 7px;
+        }
+
+        .pagination button,
+        .page-button {
+            min-width: 32px;
+            min-height: 30px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            color: #17212f;
+            background: #fff;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .pagination button.active,
+        .page-button.active {
+            border-color: var(--green);
+            color: #fff;
+            background: var(--green);
+            box-shadow: none;
+        }
+
+        .pagination button:not(:disabled):hover,
+        .page-button:not(:disabled):hover {
+            color: #fff;
+            background: var(--green);
+        }
+
+        @media (max-width: 760px) {
+            .workspace {
+                padding: 22px 16px 34px;
+            }
+
+            .heading-row,
+            .page-heading,
+            .table-footer {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .filter-grid,
+            .savings-filter-bar {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        /* Savings report consistency refinements */
+        .download-toggle {
+            min-height: 38px;
+            border: 1px solid #cfd8e3;
+            border-radius: 7px;
+            color: #061a33;
+            background: #fff;
+            box-shadow: 0 6px 16px rgba(23, 33, 47, 0.06);
+        }
+
+        .download-toggle:hover,
+        .download-toggle:focus-visible {
+            border-color: #10b981;
+            color: var(--green);
+            outline: 0;
+        }
+
+        .savings-filter-bar {
+            border-top: 4px solid var(--green);
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 8px 22px rgba(23, 33, 47, 0.08);
+        }
+
+        .field>span:first-child,
+        .field-label {
+            color: #475467;
+            background: #f8fafc;
+            font-weight: 700;
+        }
+
+        .control,
+        .multi-select-toggle {
+            min-height: 32px;
+        }
+
+        .primary-button.icon-filter-button {
+            width: 38px;
+            min-width: 38px;
+            height: 36px;
+            min-height: 36px;
+            border-radius: 7px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            background: linear-gradient(180deg, #06966f 0%, #047857 100%);
+            box-shadow: 0 10px 20px rgba(4, 120, 87, 0.18);
+        }
+
+        .secondary-button,
+        .secondary-button.icon-filter-button {
+            border: 1px solid #b7dfd3;
+            color: var(--green);
+            background: #fff;
+        }
+
+        .secondary-button.icon-filter-button {
+            width: 38px;
+            min-width: 38px;
+            height: 36px;
+            min-height: 36px;
+            border-radius: 7px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .filter-actions .icon-filter-button .icon {
+            width: 18px;
+            height: 18px;
+            display: block;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .multi-select-menu {
+            width: min(260px, calc(100vw - 48px));
+            max-height: 260px;
+            padding: 6px;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .multi-select-option {
+            min-height: 34px;
+            display: grid !important;
+            grid-template-columns: 18px minmax(0, 1fr);
+            gap: 10px !important;
+            align-items: center;
+            border-radius: 6px;
+            padding: 7px 8px;
+            background: transparent;
+        }
+
+        .multi-select-option:hover,
+        .multi-select-option[aria-selected="true"] {
+            background: #ecfdf5;
+        }
+
+        .multi-select-option input {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            accent-color: var(--green);
+        }
+
+        .savings-filter-bar .multi-select-option span {
+            color: #061a33;
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.25;
+            text-transform: none;
+        }
+
+        .savings-kpi-card,
+        .savings-chart-card,
+        .savings-methodology-box {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.97);
+            box-shadow: 0 8px 22px rgba(23, 33, 47, 0.08);
+        }
+
+        .savings-kpi-card {
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 18px;
+            min-height: 86px;
+            padding: 18px 22px;
+            border-left: 1px solid var(--line);
+            transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+        }
+
+        .savings-kpi-card .kpi-label {
+            margin: 0;
+        }
+
+        .savings-kpi-card .kpi-value {
+            text-align: right;
+        }
+
+        .savings-kpi-card::after {
+            opacity: 0.1;
+        }
+
+        .savings-kpi-card:hover {
+            border-color: #b7dfd3;
+            box-shadow: 0 12px 28px rgba(4, 120, 87, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .savings-kpi-card.teal,
+        .savings-kpi-card.amber {
+            border-left-color: var(--line);
+        }
+
+        .savings-chart-card {
+            padding: 20px 18px;
+        }
+
+        .top-product-tile {
+            border: 1px solid #d9e0e8;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: none;
+        }
+
+        .top-product-rank {
+            background: var(--green);
+        }
+
+        .top-product-saving {
+            color: var(--green);
+        }
+
+        .savings-methodology-box {
+            border-top: 4px solid var(--green);
+        }
+
+        .savings-details-table th {
+            height: 39px;
+            background: linear-gradient(180deg, #d8f3e6 0%, #bdebd8 100%);
+        }
+
+        .savings-details-table td {
+            height: 37px;
+        }
+
+        .heading-row .download-toggle {
+            min-height: 38px;
+            border: 1px solid #cfd8e3;
+            border-radius: 7px;
+            padding: 0 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            color: #061a33;
+            background: #fff;
+            font-size: 13px;
+            font-weight: 800;
+            line-height: 1;
+            box-shadow: 0 6px 16px rgba(23, 33, 47, 0.06);
+        }
+
+        .heading-row .download-toggle .icon {
+            width: 18px;
+            height: 18px;
+            display: block;
+            color: var(--green);
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .pharmacy-filter-field .control {
+            grid-template-columns: minmax(0, 1fr);
+            padding: 0 10px;
+        }
+
+        .pharmacy-filter-field .multi-select,
+        .pharmacy-filter-field .multi-select-toggle {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .pharmacy-filter-field .multi-select-toggle {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            justify-content: stretch;
+            gap: 8px;
+        }
+
+        .pharmacy-filter-field .multi-select-toggle span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+    <link rel="stylesheet" href="navigation.css" />
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <a class="brand" href="index.html" aria-label="CASCADE home">
+                <img class="brand-logo" src="logo.png" alt="CASCADE Plus" />
+            </a>
+            <nav class="main-nav" aria-label="Primary">
+                <a href="Dashboard.html">Dashboard</a>
+                <a href="index.html">Order Pad</a>
+                <a href="history.html">Order History</a>
+                <a class="active" href="report.html" aria-current="page">Reports</a>
+                <a href="help.html">Help</a>
+                <div class="nav-more">
+                    <button class="more-toggle" type="button" aria-haspopup="true" aria-expanded="false">More</button>
+                    <div class="more-menu" role="menu">
+                        <a href="pending.html" role="menuitem">Pending Order</a>
+                        <a href="outofstock.html" role="menuitem">Out Of Stock</a>
+                        <a href="settings.html" role="menuitem">Settings</a>
+                    </div>
+                </div>
+            </nav>
+            <div class="account-menu">
+                <button class="profile-button" type="button" aria-haspopup="true" aria-expanded="false">HI,
+                    DUMMY1</button>
+                <div class="account-dropdown" role="menu">
+                    <button class="account-menu-item" type="button" role="menuitem">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M3 11.5 12 4l9 7.5"></path>
+                            <path d="M5.5 10.5V20h13v-9.5"></path>
+                            <path d="M9.5 17h5"></path>
+                        </svg>
+                        Reset Password
+                    </button>
+                    <span class="account-menu-separator" aria-hidden="true"></span>
+                    <button class="account-menu-item" type="button" role="menuitem">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="7.5" cy="16.5" r="3"></circle>
+                            <path d="m10 14 7.5-7.5"></path>
+                            <path d="m15.5 8.5 2 2"></path>
+                        </svg>
+                        Log Out
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="workspace">
+            <div class="heading-row">
+                <section class="page-heading" aria-labelledby="savingsReportTitle">
+                    <h1 id="savingsReportTitle">Savings Report</h1>
+                    <p>Track realised supplier price savings and missed saving opportunities.</p>
+                </section>
+                <div class="download-menu">
+                    <button class="download-toggle" id="exportSavingsReport" type="button" aria-label="Export CSV">
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 3v12"></path>
+                            <path d="m8 11 4 4 4-4"></path>
+                            <path d="M5 21h14"></path>
+                        </svg>
+                        Download
+                    </button>
+                </div>
+            </div>
+
+            <section class="savings-report-view" aria-labelledby="savingsReportTitle">
+                <form class="savings-filter-bar" id="savingsFilterBar">
+                    <label class="field">
+                        <span class="filter-label-row">Date Range <small class="range-limit-note"
+                                id="customRangeLimitNote">MAX 3 months</small></span>
+                        <span class="control select-wrap">
+                            <select id="dateRangeFilter">
+                                <option>Today</option>
+                                <option>Yesterday</option>
+                                <option>7 Days</option>
+                                <option>This Month</option>
+                                <option>Previous Month</option>
+                                <option selected>Custom</option>
+                            </select>
+                        </span>
+                    </label>
+                    <div class="custom-date-range" id="customDateRange">
+                        <label class="field">
+                            <span>From</span>
+                            <span class="control date-wrap"><input id="customDateFrom" type="date"
+                                    value="2025-01-01" /></span>
+                        </label>
+                        <label class="field">
+                            <span>To</span>
+                            <span class="control date-wrap"><input id="customDateTo" type="date"
+                                    value="2025-06-30" /></span>
+                        </label>
+                    </div>
+                    <label class="field pharmacy-filter-field">
+                        <span>Pharmacy</span>
+                        <span class="control">
+                            <div class="multi-select" id="pharmacyFilter">
+                                <button class="multi-select-toggle" id="pharmacyFilterToggle" type="button"
+                                    aria-haspopup="listbox" aria-expanded="false"><span id="pharmacyFilterSummary">All
+                                        Pharmacies</span></button>
+                                <div class="multi-select-menu" id="pharmacyFilterMenu" role="listbox"
+                                    aria-multiselectable="true" hidden></div>
+                            </div>
+                        </span>
+                    </label>
+                    <div class="filter-actions">
+                        <button class="primary-button icon-filter-button" type="submit" title="Apply Filters"
+                            aria-label="Apply Filters">
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="11" cy="11" r="7"></circle>
+                                <path d="m16.5 16.5 4 4"></path>
+                            </svg>
+                        </button>
+                        <button class="secondary-button icon-filter-button" id="resetSavingsFilters" type="button"
+                            title="Reset Filters" aria-label="Reset Filters">
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M3 12a9 9 0 1 0 3-6.7"></path>
+                                <path d="M3 4v5h5"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+
+                <section class="savings-kpi-grid" id="savingsKpis" aria-label="Savings KPIs"></section>
+
+                <section class="savings-analytics-grid" aria-label="Savings analytics">
+                    <article class="savings-chart-card top-products-card">
+                        <div class="card-heading top-products-heading">
+                            <div>
+                                <h2>Savings on Most Ordered Products <span class="info-icon small-info"
+                                        title="Products are ranked by total quantity ordered for the selected filters and date range."
+                                        aria-label="Products are ranked by total quantity ordered for the selected filters and date range.">i</span>
+                                </h2>
+                            </div>
+                        </div>
+                        <div class="top-products-grid" id="topProductsGrid" aria-live="polite"></div>
+                    </article>
+
+                    <article class="savings-chart-card savings-over-time-card">
+                        <div class="card-heading">
+                            <h2>Savings Over Time <span class="info-icon small-info"
+                                    title="Shows total savings trend across the selected date period."
+                                    aria-label="Shows total savings trend across the selected date period.">i</span>
+                            </h2>
+                        </div>
+                        <div class="vertical-chart" id="savingsOverTimeChart" role="img" aria-label="Savings chart">
+                        </div>
+                    </article>
+                </section>
+
+                <section class="savings-methodology-box">
+                    <span class="info-icon methodology-info-icon" aria-hidden="true">i</span>
+                    <div>
+                        <h2>How savings are calculated</h2>
+                        <p>Savings are calculated from the difference between the highest available supplier price and
+                            the price paid for the same product at the time of ordering.</p>
+                    </div>
+                    <div class="formula-list">
+                        <strong class="formula-pill">Actual Saving = Highest Available Price - Price Paid</strong>
+                    </div>
+                    <ul>
+                        <li>Orders with no price difference are marked as No Saving.</li>
+                        <li>All figures are based on the selected filters.</li>
+                    </ul>
+                </section>
+            </section>
+        </main>
+    </div>
+
+    <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+    <script src="account-menu.js"></script>
+    <script>const savingsRows = [
+            ["2025-06-30", "ORD-250628-001", "Pharmacy A", "Atorvastatin 20mg Tabs (28)", "1234567", "Generic", "Alliance", 4, 2.1, 3.25],
+            ["2025-06-30", "ORD-250627-014", "Pharmacy B", "Metformin 500mg Tabs (56)", "2345678", "Insulin product", "AAH", 6, 1.35, 2.1],
+            ["2025-06-29", "ORD-250625-007", "Pharmacy C", "Citalopram 20mg Tabs (28)", "7890123", "Controlled drug", "B&S", 2, 1.45, 1.2],
+            ["2025-06-24", "ORD-250624-002", "Pharmacy B", "Vitamin D3 1000iu Tabs (90)", "8901234", "Food", "Lexon", 1, 1.42, 1.98],
+            ["2025-06-21", "ORD-250621-019", "Pharmacy A", "Ramipril 5mg Caps (28)", "3456789", "Generic", "Alliance", 10, 0.82, 2.04],
+            ["2025-06-19", "ORD-250619-011", "Pharmacy D", "Salbutamol 100mcg Inhaler", "4567890", "Branded", "Phoenix", 8, 1.95, 4.6],
+            ["2025-06-17", "ORD-250617-022", "Pharmacy E", "Omeprazole 20mg Caps (28)", "5678901", "Specials", "AAH", 12, 0.94, 2.35],
+            ["2025-06-13", "ORD-250613-018", "Pharmacy C", "Amoxicillin 500mg Caps (21)", "6789012", "Cat M drugs", "B&S", 15, 4.95, 3.8],
+            ["2025-05-29", "ORD-250529-020", "Pharmacy A", "Bisoprolol 2.5mg Tabs (28)", "3456711", "Generic", "Alliance", 22, 0.72, 1.88],
+            ["2025-05-23", "ORD-250523-012", "Pharmacy F", "Lansoprazole 15mg Caps (28)", "9123456", "Specials", "Phoenix", 16, 0.88, 1.76],
+            ["2025-05-15", "ORD-250515-004", "Pharmacy B", "Gliclazide 80mg Tabs (28)", "8123456", "Insulin product", "AAH", 18, 1.08, 2.52],
+            ["2025-04-30", "ORD-250430-009", "Pharmacy D", "Co-codamol 8/500mg Tabs (32)", "7123456", "Cat M drugs", "Alliance", 25, 1.52, 2.5],
+            ["2025-04-18", "ORD-250418-016", "Pharmacy E", "Seretide 250 Evohaler", "6123456", "Branded", "Phoenix", 5, 16.4, 24.1],
+            ["2025-03-26", "ORD-250326-006", "Pharmacy F", "Amlodipine 5mg Tabs (28)", "5123456", "Generic", "AAH", 30, 0.64, 1.44],
+            ["2025-03-11", "ORD-250311-005", "Pharmacy A", "Insulin Glargine 100u/ml Pen", "4123456", "Insulin product", "Alliance", 7, 18.2, 29.6],
+            ["2025-02-22", "ORD-250222-013", "Pharmacy C", "Prednisolone 5mg Tabs (28)", "3123456", "Branded", "B&S", 20, 0.78, 1.66],
+            ["2025-02-09", "ORD-250209-017", "Pharmacy D", "Fluoxetine 20mg Caps (30)", "2123456", "Controlled drug", "AAH", 11, 1.12, 2.12],
+            ["2025-01-27", "ORD-250127-010", "Pharmacy E", "Aspirin 75mg Tabs (28)", "1123456", "Generic", "Phoenix", 28, 0.41, 1.05],
+            ["2025-01-16", "ORD-250116-003", "Pharmacy B", "Senna 7.5mg Tabs (60)", "1023456", "Specials", "Alliance", 14, 1.25, 1.25],
+            ["2025-01-08", "ORD-250108-021", "Pharmacy F", "Paracetamol 500mg Tabs (100)", "9023456", "Cat M drugs", "AAH", 40, 1.88, 2.65]
+        ].map(([orderDate, orderReference, pharmacy, product, pip, category, supplier, quantity, pricePaid, highestPrice]) => ({
+            orderDate,
+            orderReference,
+            pharmacy,
+            product,
+            pip,
+            category,
+            supplier,
+            quantity,
+            pricePaid,
+            highestPrice
+        })).map((row, index) => ({ ...row, orderReference: String(329950 + index) }));
+
+        const TOP_ORDERED_PRODUCTS_DISPLAY_LIMIT = 12;
+
+        const baseSavingsRowCount = savingsRows.length;
+        for (let index = baseSavingsRowCount; index < 34; index += 1) {
+            const source = savingsRows[index % baseSavingsRowCount];
+            const date = new Date(`${source.orderDate}T00:00:00`);
+            date.setDate(Math.max(1, date.getDate() - Math.floor(index / baseSavingsRowCount)));
+            savingsRows.push({
+                ...source,
+                orderDate: date.toISOString().slice(0, 10),
+                orderReference: String(329950 + index),
+                quantity: source.quantity + (index % 3),
+                pricePaid: typeof source.pricePaid === "number" ? Number((source.pricePaid + (index % 4) * 0.03).toFixed(2)) : source.pricePaid,
+                highestPrice: typeof source.highestPrice === "number" ? Number((source.highestPrice + (index % 5) * 0.04).toFixed(2)) : source.highestPrice
+            });
+        }
+
+        const savingsState = {
+            filters: {
+                dateRange: "Custom",
+                customFrom: "2025-01-01",
+                customTo: "2025-06-30",
+                pharmacy: ["All Pharmacies"]
+            },
+            overTimeMetric: "savings",
+            topProductsLoading: false,
+            rows: []
+        };
+
+        const savingsEls = {
+            filterBar: document.querySelector("#savingsFilterBar"),
+            dateRangeFilter: document.querySelector("#dateRangeFilter"),
+            customDateRange: document.querySelector("#customDateRange"),
+            customDateFrom: document.querySelector("#customDateFrom"),
+            customDateTo: document.querySelector("#customDateTo"),
+            customRangeLimitNote: document.querySelector("#customRangeLimitNote"),
+            pharmacyFilter: document.querySelector("#pharmacyFilter"),
+            pharmacyFilterToggle: document.querySelector("#pharmacyFilterToggle"),
+            pharmacyFilterSummary: document.querySelector("#pharmacyFilterSummary"),
+            pharmacyFilterMenu: document.querySelector("#pharmacyFilterMenu"),
+            kpis: document.querySelector("#savingsKpis"),
+            overTimeChart: document.querySelector("#savingsOverTimeChart"),
+            topProductsGrid: document.querySelector("#topProductsGrid"),
+            toastRegion: document.querySelector("#toastRegion")
+        };
+
+        function initSavingsReport() {
+            loadSavingsData();
+            populateSavingsFilters();
+            savingsEls.filterBar.addEventListener("submit", applySavingsFilters);
+            document.querySelector("#resetSavingsFilters").addEventListener("click", resetSavingsFilters);
+            savingsEls.dateRangeFilter.addEventListener("change", handleDateRangeChange);
+            savingsEls.customDateFrom.addEventListener("change", handleCustomDateChange);
+            savingsEls.customDateTo.addEventListener("change", handleCustomDateChange);
+            savingsEls.pharmacyFilterToggle.addEventListener("click", togglePharmacyFilterMenu);
+            savingsEls.pharmacyFilterMenu.addEventListener("change", handlePharmacySelectionChange);
+            document.addEventListener("click", closePharmacyFilterOnOutsideClick);
+            document.querySelector("#exportSavingsReport").addEventListener("click", exportSavingsReport);
+            renderSavingsReport();
+        }
+
+        function loadSavingsData() {
+            savingsState.rows = savingsRows.map((row, index) => {
+                const calculation = calculateRowSaving(row, index);
+                return { ...row, ...calculation };
+            });
+        }
+
+        function calculateRowSaving(row, index = 0) {
+            const pricePaid = Number(row.pricePaid);
+            const quantity = Number(row.quantity) || 0;
+            if (!Number.isFinite(pricePaid)) {
+                return {
+                    lowestAvailablePrice: 0,
+                    highestAvailablePrice: 0,
+                    savingPerUnit: 0,
+                    totalSaving: 0,
+                    status: "No Saving"
+                };
+            }
+
+            const highestAvailablePrice = Number(Math.max(pricePaid, Number(row.highestPrice) || 0).toFixed(2));
+            const lowestAvailablePrice = deriveLowestAvailablePrice(pricePaid, highestAvailablePrice, index);
+            const savingPerUnit = Number(Math.max(0, highestAvailablePrice - pricePaid).toFixed(2));
+            const totalSaving = Number((savingPerUnit * quantity).toFixed(2));
+            const status = totalSaving > 0 ? "Saved" : "No Saving";
+            return {
+                lowestAvailablePrice,
+                highestAvailablePrice,
+                savingPerUnit,
+                totalSaving,
+                status
+            };
+        }
+
+        function deriveLowestAvailablePrice(pricePaid, highestAvailablePrice, index) {
+            const selectedSupplierPosition = index % 4;
+            if (selectedSupplierPosition === 0) return Number(pricePaid.toFixed(2));
+
+            const exampleRangeWidth = Math.max(0.02, highestAvailablePrice * (0.05 + selectedSupplierPosition * 0.03));
+            const comparisonWindow = Math.min(pricePaid * 0.35, exampleRangeWidth);
+            return Number(Math.max(0, pricePaid - comparisonWindow).toFixed(2));
+        }
+
+        function populateSavingsFilters() {
+            fillPharmacyMultiSelect(uniqueValues("pharmacy"));
+        }
+
+        function uniqueValues(key) {
+            return [...new Set(savingsRows.map((row) => row[key]))].sort();
+        }
+
+        function fillPharmacyMultiSelect(values) {
+            savingsEls.pharmacyFilterMenu.innerHTML = [
+                pharmacyOptionTemplate("All Pharmacies", true),
+                ...values.map((value) => pharmacyOptionTemplate(value, true))
+            ].join("");
+            updatePharmacyFilterSummary();
+        }
+
+        function pharmacyOptionTemplate(value, checked) {
+            return `
+    <label class="multi-select-option" role="option" aria-selected="${checked ? "true" : "false"}">
+      <input type="checkbox" value="${escapeHtml(value)}" ${checked ? "checked" : ""} />
+      <span>${escapeHtml(value)}</span>
+    </label>
+  `;
+        }
+
+        function togglePharmacyFilterMenu() {
+            const isOpen = !savingsEls.pharmacyFilterMenu.hidden;
+            savingsEls.pharmacyFilterMenu.hidden = isOpen;
+            savingsEls.pharmacyFilterToggle.setAttribute("aria-expanded", String(!isOpen));
+        }
+
+        function closePharmacyFilterOnOutsideClick(event) {
+            if (savingsEls.pharmacyFilter.contains(event.target)) return;
+            closePharmacyFilterMenu();
+        }
+
+        function closePharmacyFilterMenu() {
+            savingsEls.pharmacyFilterMenu.hidden = true;
+            savingsEls.pharmacyFilterToggle.setAttribute("aria-expanded", "false");
+        }
+
+        function handlePharmacySelectionChange(event) {
+            if (event.target.type !== "checkbox") return;
+
+            const checkboxes = getPharmacyCheckboxes();
+            const allCheckbox = checkboxes.find((checkbox) => checkbox.value === "All Pharmacies");
+            const pharmacyCheckboxes = checkboxes.filter((checkbox) => checkbox.value !== "All Pharmacies");
+
+            if (event.target.value === "All Pharmacies") {
+                checkboxes.forEach((checkbox) => {
+                    checkbox.checked = event.target.checked;
+                });
+            } else {
+                allCheckbox.checked = pharmacyCheckboxes.every((checkbox) => checkbox.checked);
+            }
+
+            updatePharmacyOptionStates();
+            updatePharmacyFilterSummary();
+        }
+
+        function getPharmacyCheckboxes() {
+            return [...savingsEls.pharmacyFilterMenu.querySelectorAll('input[type="checkbox"]')];
+        }
+
+        function getSelectedPharmacies() {
+            const checkboxes = getPharmacyCheckboxes();
+            const allSelected = checkboxes.some((checkbox) => checkbox.value === "All Pharmacies" && checkbox.checked);
+            if (allSelected) return ["All Pharmacies"];
+            return checkboxes
+                .filter((checkbox) => checkbox.checked && checkbox.value !== "All Pharmacies")
+                .map((checkbox) => checkbox.value);
+        }
+
+        function setSelectedPharmacies(values) {
+            const selected = new Set(values);
+            const selectAll = selected.has("All Pharmacies");
+            getPharmacyCheckboxes().forEach((checkbox) => {
+                checkbox.checked = selectAll || selected.has(checkbox.value);
+            });
+            updatePharmacyOptionStates();
+            updatePharmacyFilterSummary();
+        }
+
+        function updatePharmacyOptionStates() {
+            savingsEls.pharmacyFilterMenu.querySelectorAll(".multi-select-option").forEach((option) => {
+                const checkbox = option.querySelector('input[type="checkbox"]');
+                option.setAttribute("aria-selected", String(checkbox.checked));
+            });
+        }
+
+        function updatePharmacyFilterSummary() {
+            const selected = getSelectedPharmacies();
+            const pharmacyCount = getPharmacyCheckboxes().filter((checkbox) => checkbox.value !== "All Pharmacies").length;
+            const selectedCount = selected.length === 1 && selected[0] === "All Pharmacies" ? pharmacyCount : selected.length;
+
+            if (selected.length === 1 && selected[0] === "All Pharmacies") {
+                savingsEls.pharmacyFilterSummary.textContent = "All Pharmacies";
+            } else if (!selected.length) {
+                savingsEls.pharmacyFilterSummary.textContent = "Select pharmacies";
+            } else if (selected.length === 1) {
+                savingsEls.pharmacyFilterSummary.textContent = selected[0];
+            } else {
+                savingsEls.pharmacyFilterSummary.textContent = `${selectedCount} Pharmacies`;
+            }
+        }
+
+        function calculateSavingsMetrics(rows = filteredSavingsRows()) {
+            const completeRows = rows.filter((row) => typeof row.totalSaving === "number");
+            const savedRows = completeRows.filter((row) => row.totalSaving > 0);
+            const totalSavings = savedRows.reduce((sum, row) => sum + row.totalSaving, 0);
+            return {
+                totalSavings,
+                averageSavings: savedRows.length ? totalSavings / savedRows.length : 0,
+                ordersWithSavings: savedRows.length,
+                orderCount: completeRows.length
+            };
+        }
+
+        function applySavingsFilters(event) {
+            event.preventDefault();
+            applyCurrentFilterValues();
+            renderSavingsReportWithLoading();
+            toast("Savings filters applied");
+        }
+
+        function applyCurrentFilterValues() {
+            savingsState.filters = {
+                dateRange: savingsEls.dateRangeFilter.value,
+                customFrom: savingsEls.customDateFrom.value,
+                customTo: savingsEls.customDateTo.value,
+                pharmacy: getSelectedPharmacies()
+            };
+        }
+
+        function resetSavingsFilters() {
+            savingsEls.dateRangeFilter.value = "Custom";
+            savingsEls.customDateFrom.value = "2025-01-01";
+            savingsEls.customDateTo.value = "2025-06-30";
+            setSelectedPharmacies(["All Pharmacies"]);
+            closePharmacyFilterMenu();
+            savingsState.filters = { dateRange: "Custom", customFrom: "2025-01-01", customTo: "2025-06-30", pharmacy: ["All Pharmacies"] };
+            handleDateRangeChange();
+            renderSavingsReport();
+            toast("Savings filters reset");
+        }
+
+        function filteredSavingsRows() {
+            return filterSavingsRowsByFilters(savingsState.filters);
+        }
+
+        function filterSavingsRowsByFilters(filters) {
+            const { dateRange, customFrom, customTo, pharmacy } = filters;
+            const [fromDate, toDate] = resolveDateRange(dateRange, customFrom, customTo);
+            return savingsState.rows.filter((row) => {
+                const orderDate = new Date(`${row.orderDate}T00:00:00`);
+                const dateMatch = orderDate >= fromDate && orderDate <= toDate;
+                const pharmacyMatch = pharmacy.includes("All Pharmacies") || pharmacy.includes(row.pharmacy);
+                return dateMatch && pharmacyMatch;
+            });
+        }
+
+        function renderSavingsReport() {
+            const rows = filteredSavingsRows();
+            renderSavingsKpis(rows);
+            renderSavingsCharts(rows);
+            renderTopOrderedProducts(rows);
+        }
+
+        function renderSavingsReportWithLoading() {
+            savingsState.topProductsLoading = true;
+            renderSavingsReport();
+            window.setTimeout(() => {
+                savingsState.topProductsLoading = false;
+                renderSavingsReport();
+            }, 180);
+        }
+
+        function renderSavingsKpis(rows = filteredSavingsRows()) {
+            const metrics = calculateSavingsMetrics(rows);
+            const cards = [
+                ["Total Savings", formatCurrency(metrics.totalSavings), "", "#047857", "#f3fffb"],
+                ["Average Savings per Order", formatCurrency(metrics.averageSavings), "", "#3575db", "#f4f8ff"],
+                ["No. Of Orders", metrics.ordersWithSavings, "teal", "#00a99a", "#f2fffd"]
+            ];
+            savingsEls.kpis.innerHTML = cards.map(([label, value, tone, accent, tint]) => `
+    <article class="savings-kpi-card ${tone}" style="--accent:${accent};--tint:${tint}">
+      <div class="kpi-copy">
+        <p class="kpi-label">${label}</p>
+      </div>
+      <strong class="kpi-value">${value}</strong>
+    </article>
+  `).join("");
+        }
+
+        function renderSavingsCharts(rows = filteredSavingsRows()) {
+            const overTimeData = getOverTimeChartData(rows, savingsState.filters.dateRange, savingsState.overTimeMetric);
+            const maxValue = Math.max(...overTimeData.map((item) => item.savings || 0));
+            const axisMax = niceAxisMax(maxValue);
+            const yTicks = [axisMax, axisMax * 0.75, axisMax * 0.5, axisMax * 0.25, 0];
+            const legend = `<span><span class="legend-swatch savings"></span>Total Savings (&pound;)</span>`;
+            const tickPosition = (index) => `${(index / Math.max(yTicks.length - 1, 1)) * 100}%`;
+            const points = overTimeData.map((item, index) => {
+                const value = Number(item.savings) || 0;
+                const x = overTimeData.length === 1 ? 50 : 6 + (index / (overTimeData.length - 1)) * 88;
+                const y = 100 - Math.min(100, Math.max(0, (value / axisMax) * 100));
+                return { ...item, value, x, y };
+            });
+            const linePath = points.map((point, index) => `${index ? "L" : "M"} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`).join(" ");
+            const areaPath = points.length
+                ? `M ${points[0].x.toFixed(2)} 100 L ${points.map((point) => `${point.x.toFixed(2)} ${point.y.toFixed(2)}`).join(" L ")} L ${points[points.length - 1].x.toFixed(2)} 100 Z`
+                : "";
+            savingsEls.overTimeChart.innerHTML = `
+    <div class="chart-stage-row">
+      <div class="chart-y-axis" aria-hidden="true">
+        ${yTicks.map((tick, index) => `<span style="top:${tickPosition(index)}">${formatAxisTick(tick)}</span>`).join("")}
+      </div>
+      <div class="line-chart-stage">
+        <div class="grid-lines" aria-hidden="true">${yTicks.map((_, index) => `<span style="top:${tickPosition(index)}"></span>`).join("")}</div>
+        <svg class="line-chart-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="savingsAreaGradient" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#10b981" stop-opacity="0.32"></stop>
+              <stop offset="72%" stop-color="#a7f3d0" stop-opacity="0.18"></stop>
+              <stop offset="100%" stop-color="#ffffff" stop-opacity="0"></stop>
+            </linearGradient>
+          </defs>
+          <path class="line-area" d="${areaPath}"></path>
+          <path class="line-path" d="${linePath}"></path>
+        </svg>
+        ${points.map((point) => `
+          <span class="line-chart-value" style="left:${point.x}%;top:${Math.max(6, point.y - 6)}%">${formatCurrency(point.value, 0)}</span>
+          <span class="line-chart-dot" style="left:${point.x}%;top:${point.y}%"></span>
+        `).join("")}
+      </div>
+    </div>
+    <div class="line-chart-x-axis" style="grid-template-columns: repeat(${Math.max(points.length, 1)}, minmax(0, 1fr));">
+      ${points.map((point) => `<span>${point.label}</span>`).join("")}
+    </div>
+    <div class="chart-legend">${legend}</div>
+  `;
+        }
+
+        function calculateTopOrderedProducts(rows = filteredSavingsRows(), limit = TOP_ORDERED_PRODUCTS_DISPLAY_LIMIT) {
+            const grouped = new Map();
+            rows.forEach((row) => {
+                const key = `${row.product}|${row.pip}`;
+                const existing = grouped.get(key) || {
+                    product: row.product,
+                    pip: row.pip,
+                    quantity: 0,
+                    orderCount: 0,
+                    totalSaving: 0,
+                    highestSpend: 0
+                };
+                existing.quantity += Number(row.quantity) || 0;
+                existing.orderCount += 1;
+                existing.totalSaving += Number(row.totalSaving) || 0;
+                existing.highestSpend += (Number(row.highestPrice) || 0) * (Number(row.quantity) || 0);
+                grouped.set(key, existing);
+            });
+
+            return [...grouped.values()]
+                .filter((product) => product.totalSaving > 0)
+                .sort((a, b) => b.quantity - a.quantity || b.orderCount - a.orderCount || a.product.localeCompare(b.product))
+                .slice(0, limit)
+                .map((product, index) => ({ ...product, rank: index + 1, trend: productTrend(index) }));
+        }
+
+        function productTrend(index) {
+            return [12.5, 8.2, -3.4, 6.8, 1.5, -2.1, 4, 0.5, -1.3, 3.7][index] || 0;
+        }
+
+        function renderTopOrderedProducts(rows = filteredSavingsRows()) {
+            if (savingsState.topProductsLoading) {
+                renderTopProductsLoadingState();
+                return;
+            }
+
+            const products = calculateTopOrderedProducts(rows, TOP_ORDERED_PRODUCTS_DISPLAY_LIMIT);
+
+            if (!products.length) {
+                renderTopProductsEmptyState();
+                return;
+            }
+
+            const maxSaving = Math.max(...products.map((product) => product.totalSaving), 1);
+            savingsEls.topProductsGrid.innerHTML = `
+    <table class="top-products-table">
+      <thead>
+        <tr>
+          <th class="rank-col" aria-label="Rank"></th>
+          <th>Product</th>
+          <th class="savings-col">Total Savings (&pound;)</th>
+          <th class="number-col center">Orders</th>
+          <th class="number-col center">QTY</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${products.map((product) => topProductRowTemplate(product, maxSaving)).join("")}
+      </tbody>
+    </table>
+  `;
+        }
+
+        function renderTopProductsLoadingState() {
+            savingsEls.topProductsGrid.innerHTML = Array.from({ length: TOP_ORDERED_PRODUCTS_DISPLAY_LIMIT }, (_, index) => `
+    <div class="top-product-tile top-products-loading" aria-hidden="true">
+      <span class="top-product-rank">${index + 1}</span>
+      <span class="skeleton-line wide"></span>
+      <span class="skeleton-line short"></span>
+    </div>
+  `).join("");
+        }
+
+        function renderTopProductsEmptyState() {
+            savingsEls.topProductsGrid.innerHTML = `
+    <div class="top-products-empty">
+      <strong>No ordered products found</strong>
+      <span>Try changing the date range or pharmacy filter.</span>
+      <button class="secondary-button" type="button" id="emptyResetFilters">Reset Filters</button>
+    </div>
+  `;
+            document.querySelector("#emptyResetFilters").addEventListener("click", resetSavingsFilters);
+        }
+
+        function topProductRowTemplate(product, maxSaving) {
+            const productName = formatProductTileName(product.product);
+            const savingAmount = formatCurrency(Math.max(0, product.totalSaving));
+            const savingWidth = Math.max(4, (Math.max(0, product.totalSaving) / maxSaving) * 100);
+            return `
+    <tr class="top-product-row" aria-label="${escapeHtml(product.product)}, ranked ${product.rank}, ${formatNumber(product.quantity)} quantity ordered">
+      <td><span class="top-product-rank">${product.rank}</span></td>
+      <td><span class="top-product-name">${productName}</span></td>
+      <td>
+        <span class="top-product-saving-cell">
+          <span class="top-product-saving-track" aria-hidden="true">
+            <span class="top-product-saving-fill" style="width:${savingWidth}%"></span>
+          </span>
+          <strong class="top-product-saving">${savingAmount}</strong>
+        </span>
+      </td>
+      <td class="center">${formatNumber(product.orderCount)}</td>
+      <td class="center">${formatNumber(product.quantity)}</td>
+    </tr>
+  `;
+        }
+
+        function formatProductTileName(value) {
+            return escapeHtml(value)
+                .replace(/-/g, "&#8209;")
+                .replace(/\//g, "&#8260;");
+        }
+
+        function productTrendDisplay(value) {
+            const percent = Math.abs(value).toFixed(1);
+            if (value > 0) {
+                return {
+                    text: `&uarr; ${percent}%`,
+                    className: "positive",
+                    title: `Quantity ordered increased by ${percent}% compared with the previous period.`
+                };
+            }
+            if (value < 0) {
+                return {
+                    text: `&darr; ${percent}%`,
+                    className: "negative",
+                    title: `Quantity ordered decreased by ${percent}% compared with the previous period.`
+                };
+            }
+            return {
+                text: "No change",
+                className: "neutral",
+                title: "Quantity ordered is unchanged compared with the previous period."
+            };
+        }
+
+        function productIconSvg() {
+            return '<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M18 13h12M20 13V8h8v5M17 17h14l3 5v17a3 3 0 0 1-3 3H17a3 3 0 0 1-3-3V22l3-5Z" stroke-width="3" stroke-linejoin="round"/><path d="M18 28h12v9H18z" stroke-width="2.5" stroke-linejoin="round"/><path d="M21 32.5h6M24 29.5v6" stroke-width="2.5" stroke-linecap="round"/></svg>';
+        }
+
+        function orderBagIconSvg() {
+            return '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 9V7a5 5 0 0 1 10 0v2M5.5 9h13l.8 10.5H4.7L5.5 9Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg>';
+        }
+
+        function productTrendMeta(value) {
+            if (value > 0) return { text: `&uarr; ${Math.abs(value).toFixed(1)}%`, className: "positive" };
+            if (value < 0) return { text: `&darr; ${Math.abs(value).toFixed(1)}%`, className: "negative" };
+            return { text: "No change", className: "neutral" };
+        }
+
+        function getOverTimeChartData(rows, range, metric) {
+            const [fromDate, toDate] = resolveDateRange(savingsState.filters.dateRange, savingsState.filters.customFrom, savingsState.filters.customTo);
+            const valueKeys = ["totalSaving"];
+            const series = buildOverTimeSeries(fromDate, toDate, rows, range, valueKeys);
+            return series.map((item) => ({
+                label: item.label,
+                savings: item.totalSaving
+            }));
+        }
+
+        function buildOverTimeSeries(fromDate, toDate, rows, range, valueKeys) {
+            if (range === "Today" || range === "Yesterday") {
+                const labels = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"];
+                return labels.map((label, index) => {
+                    const bucketRows = rows.filter((row, rowIndex) => rowIndex % labels.length === index);
+                    return overTimeBucket(label, bucketRows, valueKeys);
+                });
+            }
+            if (range === "7 Days") {
+                const series = [];
+                const cursor = new Date(fromDate);
+                while (cursor <= toDate) {
+                    const key = cursor.toISOString().slice(0, 10);
+                    const label = cursor.toLocaleDateString("en-GB", { weekday: "short" });
+                    series.push(overTimeBucket(label, rows.filter((row) => row.orderDate === key), valueKeys));
+                    cursor.setDate(cursor.getDate() + 1);
+                }
+                return series;
+            }
+            if (range === "This Month" || range === "Previous Month") {
+                const series = [];
+                const cursor = new Date(fromDate);
+                let week = 1;
+                while (cursor <= toDate) {
+                    const weekStart = new Date(cursor);
+                    const weekEnd = new Date(cursor);
+                    weekEnd.setDate(weekEnd.getDate() + 6);
+                    const boundedEnd = weekEnd > toDate ? toDate : weekEnd;
+                    const bucketRows = rows.filter((row) => {
+                        const rowDate = new Date(`${row.orderDate}T00:00:00`);
+                        return rowDate >= weekStart && rowDate <= boundedEnd;
+                    });
+                    series.push(overTimeBucket(`Week ${week}`, bucketRows, valueKeys));
+                    cursor.setDate(cursor.getDate() + 7);
+                    week += 1;
+                }
+                return series.length ? series : [overTimeBucket("Week 1", [], valueKeys)];
+            }
+
+            const series = [];
+            const cursor = new Date(fromDate.getFullYear(), fromDate.getMonth(), 1);
+            while (cursor <= toDate) {
+                const month = cursor.getMonth();
+                const year = cursor.getFullYear();
+                const label = cursor.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+                const bucketRows = rows.filter((row) => {
+                    const rowDate = new Date(`${row.orderDate}T00:00:00`);
+                    return rowDate.getMonth() === month && rowDate.getFullYear() === year;
+                });
+                series.push(overTimeBucket(label, bucketRows, valueKeys));
+                cursor.setMonth(cursor.getMonth() + 1);
+            }
+            return series.length ? series : [overTimeBucket("No data", [], valueKeys)];
+        }
+
+        function overTimeBucket(label, rows, valueKeys) {
+            const bucket = { label, totalSaving: 0 };
+            valueKeys.forEach((key) => {
+                bucket[key] = Number(rows.reduce((sum, row) => sum + (Number(row[key]) || 0), 0).toFixed(2));
+            });
+            return bucket;
+        }
+
+        function aggregateCategorySavings(rows) {
+            const totals = new Map();
+            rows.forEach((row) => {
+                if (typeof row.totalSaving !== "number" || row.totalSaving <= 0) return;
+                totals.set(row.category, (totals.get(row.category) || 0) + row.totalSaving);
+            });
+            const topCategories = [...totals.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+            return topCategories.length ? topCategories : [["No savings", 0]];
+        }
+
+        function buildSavingsInsights(rows) {
+            const savedRows = rows.filter((row) => typeof row.totalSaving === "number" && row.totalSaving > 0);
+            const highestProduct = [...savedRows].sort((a, b) => b.totalSaving - a.totalSaving)[0];
+            const supplier = topGroupedValue(savedRows, "supplier");
+            const category = topGroupedValue(savedRows, "category");
+            return [
+                ["Highest Saving Product", highestProduct?.product || "No saved orders", formatCurrency(highestProduct?.totalSaving || 0), "Total Saving", "", "*"],
+                ["Best Performing Supplier", supplier.label, formatCurrency(supplier.value), "Total Savings", "teal", "#"],
+                ["Top Saving Category", category.label, formatCurrency(category.value), "Total Savings", "purple", "~"]
+            ];
+        }
+
+        function topGroupedValue(rows, key) {
+            const totals = new Map();
+            rows.forEach((row) => totals.set(row[key], (totals.get(row[key]) || 0) + row.totalSaving));
+            const [label, value] = [...totals.entries()].sort((a, b) => b[1] - a[1])[0] || ["No data", 0];
+            return { label, value };
+        }
+
+        function formatAxisTick(value) {
+            if (value === 0) return "\u00a30";
+            if (value >= 1000) return `\u00a3${Number(value / 1000).toLocaleString("en-GB", { maximumFractionDigits: 1 })}K`;
+            return formatCurrency(value, 0);
+        }
+
+        function niceAxisMax(value) {
+            if (!value || value <= 0) return 100;
+            const magnitude = 10 ** Math.floor(Math.log10(value));
+            const normalized = value / magnitude;
+            const niceNormalized = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 2.5 ? 2.5 : normalized <= 5 ? 5 : 10;
+            return niceNormalized * magnitude;
+        }
+
+        function exportSavingsReport() {
+            const rows = filteredSavingsRows();
+            const header = ["Order Date", "Order", "Pharmacy", "Product Description", "PIP Code", "Selected Supplier", "Quantity", "Price Paid", "Lowest Available Price", "Highest Available Price", "Actual Saving per Unit", "Actual Saving", "Saving Status"];
+            const csvRows = rows.map((row) => [
+                formatDate(row.orderDate),
+                row.orderReference,
+                row.pharmacy,
+                row.product,
+                row.pip,
+                row.supplier,
+                row.quantity,
+                row.pricePaid ?? "",
+                row.lowestAvailablePrice ?? "",
+                row.highestAvailablePrice ?? "",
+                row.savingPerUnit ?? "",
+                row.totalSaving ?? "",
+                row.status
+            ]);
+            const csv = [header, ...csvRows].map((row) => row.map(csvCell).join(",")).join("\n");
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "cascade-savings-report.csv";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(link.href);
+            toast("Savings report CSV export started");
+        }
+
+        function csvCell(value) {
+            return `"${String(value).replace(/"/g, '""')}"`;
+        }
+
+        function formatCurrency(value, fractionDigits = 2) {
+            return new Intl.NumberFormat("en-GB", {
+                style: "currency",
+                currency: "GBP",
+                minimumFractionDigits: fractionDigits,
+                maximumFractionDigits: fractionDigits
+            }).format(value || 0);
+        }
+
+        function formatNumber(value) {
+            return Number(value || 0).toLocaleString("en-GB");
+        }
+
+        function formatDate(value) {
+            return new Date(`${value}T00:00:00`).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+        }
+
+        function handleDateRangeChange() {
+            const isCustom = savingsEls.dateRangeFilter.value === "Custom";
+            savingsEls.customDateRange.hidden = !isCustom;
+            savingsEls.customRangeLimitNote.hidden = !isCustom;
+        }
+
+        function handleCustomDateChange() {
+            savingsState.filters.customFrom = savingsEls.customDateFrom.value;
+            savingsState.filters.customTo = savingsEls.customDateTo.value;
+        }
+
+        function resolveDateRange(range, customFrom, customTo) {
+            const today = new Date("2025-06-30T00:00:00");
+            const start = new Date(today);
+            const end = new Date(today);
+            if (range === "Today") return [start, end];
+            if (range === "Yesterday") {
+                start.setDate(today.getDate() - 1);
+                end.setDate(today.getDate() - 1);
+                return [start, end];
+            }
+            if (range === "7 Days") {
+                start.setDate(today.getDate() - 6);
+                return [start, end];
+            }
+            if (range === "This Month") {
+                start.setDate(1);
+                return [start, end];
+            }
+            if (range === "Previous Month") {
+                start.setMonth(today.getMonth() - 1, 1);
+                end.setDate(0);
+                return [start, end];
+            }
+            return [new Date(`${customFrom}T00:00:00`), new Date(`${customTo}T23:59:59`)];
+        }
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, (char) => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
+            })[char]);
+        }
+
+        function toast(message) {
+            const node = document.createElement("div");
+            node.className = "toast";
+            node.textContent = message;
+            savingsEls.toastRegion.appendChild(node);
+            window.setTimeout(() => node.remove(), 2800);
+        }
+
+        initSavingsReport();
+        handleDateRangeChange();
+    </script>
+</body>
+
+</html>
